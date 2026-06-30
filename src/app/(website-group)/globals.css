@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.input {
+    @apply w-full border rounded-md px-4 py-2 text-sm outline-none focus:border-teal-500;
+}
+
+.label {
+    @apply block text-sm font-medium mb-1;
+}
+
+.profile-menu {
+    @apply w-full flex justify-between items-center px-4 py-3 rounded-lg text-sm bg-white hover:bg-gray-100 transition;
+}
+
+.profile-menu.active {
+    @apply bg-teal-600 text-white;
+}
