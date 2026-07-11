@@ -20,13 +20,17 @@ export const cartSlice = createSlice({
             state.original_total += Number(payload.orginal_price);
             state.final_total += Number(payload.final_price);
 
-            localStorage.setItem("cart", JSON.stringify(state))
+            if (typeof window !== "undefined") {
+                localStorage.setItem("cart", JSON.stringify(state))
+            }
         },
         emptyCart: (state) => {
             state.final_total = 0;
             state.original_total = 0
             state.items = []
-            localStorage.removeItem("cart")
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("cart")
+            }
         },
         qtyChange: (state, { payload }) => {
             const cartItem = state.items.find((item) => item.id == payload.id)
@@ -55,9 +59,12 @@ export const cartSlice = createSlice({
                 }
             }
 
-            localStorage.setItem("cart", JSON.stringify(state))
+            if (typeof window !== "undefined") {
+                localStorage.setItem("cart", JSON.stringify(state))
+            }
         },
         lsToCart: (state) => {
+            if (typeof window === "undefined") return;
             const cart = JSON.parse(localStorage.getItem("cart"))
             if (cart) {
                 state.items = cart.items;

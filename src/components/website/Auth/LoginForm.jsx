@@ -1,7 +1,7 @@
 "use client";
 
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { client, notify } from "@/utils/helper";
@@ -10,13 +10,14 @@ const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const cartItems = JSON.parse(localStorage.getItem("cart")) || null;
-    const Items = cartItems?.items || []
-    // const [cartItems] = useState(() => {
-    //     if (typeof window === "undefined") return [];  // server pe empty return karo
-    //     const data = JSON.parse(localStorage.getItem("cart"));
-    //     return data?.items || [];
-    // });
+    const [Items, setItems] = useState([]);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const cartItems = JSON.parse(localStorage.getItem("cart")) || null;
+            setItems(cartItems?.items || []);
+        }
+    }, []);
 
     const [form, setForm] = useState({
         email: "",
