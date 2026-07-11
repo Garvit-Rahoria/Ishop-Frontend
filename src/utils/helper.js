@@ -19,12 +19,12 @@ const client = axios.create({
     withCredentials: true,
 });
 
-// Attach stored token at request time (browser only)
+// Attach JWT token at request time — browser only, never during SSR
 client.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
         const token = localStorage.getItem("jwt");
         if (token) {
-            config.headers["Authorization"] = token;
+            config.headers["Authorization"] = `Bearer ${token}`;
         }
     }
     return config;

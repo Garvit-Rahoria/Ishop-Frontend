@@ -24,7 +24,7 @@ export default function Header({ user }) {
     )
 
     const handleLogout = () => {
-        localStorage.removeItem("token")
+        localStorage.removeItem("jwt")
         window.location.href = "/login"
     }
 
