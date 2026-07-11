@@ -5,6 +5,8 @@ import Filters from "@/components/website/Store/Section_3/Filters/Filters";
 import ProductCard from "@/components/website/Store/Section_3/Products/ProductCard";
 import ProductsToolbar from "@/components/website/Store/Section_3/Products/ProductsToolbar";
 
+export const dynamic = "force-dynamic";
+
 
 const page = async ({ params, searchParams }) => {
 

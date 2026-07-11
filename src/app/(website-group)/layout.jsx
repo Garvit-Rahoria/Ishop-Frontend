@@ -6,6 +6,8 @@ import ReduxProvider from "@/redux/ReduxProvider";
 import NextTopLoader from 'nextjs-toploader';
 import { getMe } from "@/api/api-call";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

@@ -6,6 +6,8 @@ import { FiPlus } from 'react-icons/fi'
 import StatusBtn from '@/components/admin/StatusBtn'
 import DeleteBtn from '@/components/admin/DeleteBtn'
 
+export const dynamic = "force-dynamic";
+
 export default async function BrandPage() {
   let brands = []
   let meta = {}

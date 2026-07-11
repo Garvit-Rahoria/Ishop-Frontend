@@ -8,6 +8,8 @@ import DeleteBtn from '@/components/admin/DeleteBtn'
 import { IoImages } from "react-icons/io5";
 import ViewBtn from '@/components/admin/ViewBtn'
 
+export const dynamic = "force-dynamic";
+
 
 export default async function ProductPage() {
   let products = []

@@ -3,6 +3,8 @@ import CheckoutPage from '@/components/website/Checkout/CheckoutPage'
 import Breadcrumb from '@/components/website/global/Breadcrumb'
 import React from 'react'
 
+export const dynamic = "force-dynamic";
+
 
 export default async function page() {
 
