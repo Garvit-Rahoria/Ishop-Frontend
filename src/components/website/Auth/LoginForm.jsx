@@ -41,6 +41,10 @@ const LoginForm = () => {
 
                 if (response.data.success) {
                     console.log(response)
+                    // Save token for authenticated requests
+                    if (response.data.data?.token) {
+                        localStorage.setItem("jwt", response.data.data.token);
+                    }
                     router.push("/");
                     // setForm({
                     //     email: "",

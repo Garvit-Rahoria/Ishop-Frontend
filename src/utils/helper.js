@@ -19,6 +19,17 @@ const client = axios.create({
     withCredentials: true,
 });
 
+// Attach stored token at request time (browser only)
+client.interceptors.request.use((config) => {
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("jwt");
+        if (token) {
+            config.headers["Authorization"] = token;
+        }
+    }
+    return config;
+});
+
 const notify = (msg, flag) => toast(msg, { type: flag ? "success" : "error" });
 
 export { notify, client };
