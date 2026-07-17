@@ -1,20 +1,15 @@
-import { getMe } from '@/api/api-call'
 import CheckoutPage from '@/components/website/Checkout/CheckoutPage'
 import Breadcrumb from '@/components/website/global/Breadcrumb'
-import React from 'react'
 
+// CheckoutPage fetches user client-side via Bearer token (localStorage).
+// force-dynamic ensures this page is never statically cached.
 export const dynamic = "force-dynamic";
 
-
-export default async function page() {
-
-    const {user} = await getMe()
-
+export default function page() {
     return (
         <>
             <Breadcrumb />
-
-            <CheckoutPage user={user} />
+            <CheckoutPage />
         </>
     )
 }

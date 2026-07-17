@@ -1,33 +1,52 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRazorpay } from 'react-razorpay';
-import { emptyCart } from '@/redux/features/cartSlice';
+import { emptyCart, lsToCart } from '@/redux/features/cartSlice';
 import { client, notify } from '@/utils/helper';
 
-const CheckoutPage = ({ user }) => {
+const CheckoutPage = () => {
 
     const cart     = useSelector((store) => store.cart);
     const dispatch = useDispatch();
     const router   = useRouter();
 
-    const addresses = user?.addresses || [];
+    const [user,            setUser]            = useState(null);
+    const [userLoading,     setUserLoading]      = useState(true);
+    const [paymentMethod,   setPaymentMethod]   = useState('cod');
+    const [selectedAddress, setSelectedAddress] = useState(0);
+    const [loading,         setLoading]         = useState(false);
 
-    const [paymentMethod,    setPaymentMethod]    = useState('cod');
-    const [selectedAddress,  setSelectedAddress]  = useState(0);
-    const [loading,          setLoading]          = useState(false);
-
-    // Prevent duplicate Razorpay modal opens (e.g. double-click or React Strict Mode)
+    // Prevent duplicate Razorpay modal opens
     const razorpayOpenRef = useRef(false);
 
     const { Razorpay } = useRazorpay();
 
+    // ── Hydrate cart from localStorage on mount ──────────────────────────────
+    useEffect(() => {
+        dispatch(lsToCart());
+    }, [dispatch]);
+
+    // ── Fetch user (client-side, uses Bearer token from localStorage) ────────
+    useEffect(() => {
+        client.get('/user/get')
+            .then((res) => {
+                if (res.data.success) setUser(res.data.user);
+            })
+            .catch(() => {
+                // Not logged in — redirect to login
+                router.push('/login');
+            })
+            .finally(() => setUserLoading(false));
+    }, [router]);
+
+    const addresses = user?.addresses || [];
+
     const handleAddAddress = () => router.push('/profile');
 
     const handleOrder = async () => {
-        // Guard: already in-flight
         if (loading) return;
 
         if (cart.items.length === 0) {
@@ -53,17 +72,15 @@ const CheckoutPage = ({ user }) => {
                 return;
             }
 
-            // ── COD flow ──────────────────────────────────────────────────
+            // ── COD ───────────────────────────────────────────────────────
             if (paymentMethod === 'cod') {
                 dispatch(emptyCart());
                 router.push(`/thank-you?orderId=${response.data.orderId}`);
                 return;
             }
 
-            // ── Online / Razorpay flow ────────────────────────────────────
+            // ── Online / Razorpay ─────────────────────────────────────────
             if (paymentMethod === 'online') {
-
-                // Prevent duplicate modal if handler fires twice
                 if (razorpayOpenRef.current) return;
                 razorpayOpenRef.current = true;
 
@@ -99,7 +116,6 @@ const CheckoutPage = ({ user }) => {
                     },
 
                     modal: {
-                        // User closed modal without paying
                         ondismiss: () => {
                             razorpayOpenRef.current = false;
                             setLoading(false);
@@ -125,10 +141,7 @@ const CheckoutPage = ({ user }) => {
                 });
 
                 rzpInstance.open();
-
-                // Note: setLoading(false) is handled inside handler / ondismiss / payment.failed
-                // Do NOT call setLoading(false) here — Razorpay modal is still open
-                return;
+                return; // loading reset happens in callbacks
             }
 
         } catch (error) {
@@ -136,22 +149,26 @@ const CheckoutPage = ({ user }) => {
             notify(msg, false);
             console.error('handleOrder error:', error);
         } finally {
-            // Only reset loading for COD and error paths.
-            // Online path manages loading state in Razorpay callbacks.
             if (paymentMethod !== 'online' || !razorpayOpenRef.current) {
                 setLoading(false);
             }
         }
     };
 
+    // ── Loading skeleton ──────────────────────────────────────────────────────
+    if (userLoading) {
+        return (
+            <section className="bg-white py-10 min-h-[60vh] flex items-center justify-center">
+                <p className="text-gray-400 text-sm">Loading checkout...</p>
+            </section>
+        );
+    }
+
     return (
         <section className="bg-white py-10">
-
             <div className="max-w-7xl mx-auto px-4">
 
-                <h1 className="text-lg font-semibold mb-6">
-                    CHECKOUT
-                </h1>
+                <h1 className="text-lg font-semibold mb-6">CHECKOUT</h1>
 
                 {/* Notices */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -175,7 +192,6 @@ const CheckoutPage = ({ user }) => {
 
                                 {/* ADDRESS SECTION */}
                                 <div className="bg-white/90 backdrop-blur-xl border border-white/40 shadow-2xl rounded-[32px] p-6 md:p-8">
-
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                                         <div>
                                             <h2 className="text-3xl font-bold text-gray-800">Delivery Address</h2>
@@ -227,7 +243,7 @@ const CheckoutPage = ({ user }) => {
 
                                         {addresses.length === 0 && (
                                             <p className="text-gray-400 text-sm text-center py-6">
-                                                No saved addresses. Please add one to continue.
+                                                No saved addresses. Click &ldquo;+ Add New Address&rdquo; to continue.
                                             </p>
                                         )}
                                     </div>
@@ -235,15 +251,12 @@ const CheckoutPage = ({ user }) => {
 
                                 {/* PAYMENT SECTION */}
                                 <div className="bg-white/90 backdrop-blur-xl border border-white/40 shadow-2xl rounded-[32px] p-6 md:p-8">
-
                                     <div className="mb-8">
                                         <h2 className="text-3xl font-bold text-gray-800">Payment Method</h2>
                                         <p className="text-gray-500 mt-1">Choose your preferred payment option</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                                        {/* COD */}
                                         <label className={`cursor-pointer border-2 rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1
                                             ${paymentMethod === 'cod'
                                                 ? 'border-teal-500 bg-gradient-to-r from-teal-50 to-emerald-50'
@@ -251,22 +264,14 @@ const CheckoutPage = ({ user }) => {
                                             }`}
                                         >
                                             <div className="flex items-start gap-4">
-                                                <input
-                                                    type="radio"
-                                                    checked={paymentMethod === 'cod'}
-                                                    onChange={() => setPaymentMethod('cod')}
-                                                    className="mt-1 w-5 h-5 accent-teal-500"
-                                                />
+                                                <input type="radio" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} className="mt-1 w-5 h-5 accent-teal-500" />
                                                 <div>
                                                     <h3 className="text-xl font-bold text-gray-800">Cash on Delivery</h3>
-                                                    <p className="text-gray-500 mt-2 leading-relaxed">
-                                                        Pay easily when your order arrives at your doorstep.
-                                                    </p>
+                                                    <p className="text-gray-500 mt-2 leading-relaxed">Pay easily when your order arrives at your doorstep.</p>
                                                 </div>
                                             </div>
                                         </label>
 
-                                        {/* Online */}
                                         <label className={`cursor-pointer border-2 rounded-3xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1
                                             ${paymentMethod === 'online'
                                                 ? 'border-teal-500 bg-gradient-to-r from-teal-50 to-emerald-50'
@@ -274,21 +279,13 @@ const CheckoutPage = ({ user }) => {
                                             }`}
                                         >
                                             <div className="flex items-start gap-4">
-                                                <input
-                                                    type="radio"
-                                                    checked={paymentMethod === 'online'}
-                                                    onChange={() => setPaymentMethod('online')}
-                                                    className="mt-1 w-5 h-5 accent-teal-500"
-                                                />
+                                                <input type="radio" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} className="mt-1 w-5 h-5 accent-teal-500" />
                                                 <div>
                                                     <h3 className="text-xl font-bold text-gray-800">Online Payment</h3>
-                                                    <p className="text-gray-500 mt-2 leading-relaxed">
-                                                        Pay securely using UPI, Debit Card, Credit Card or Net Banking.
-                                                    </p>
+                                                    <p className="text-gray-500 mt-2 leading-relaxed">Pay securely using UPI, Debit Card, Credit Card or Net Banking.</p>
                                                 </div>
                                             </div>
                                         </label>
-
                                     </div>
                                 </div>
 
@@ -330,9 +327,7 @@ const CheckoutPage = ({ user }) => {
                                             <p className="text-sm font-medium text-emerald-700">Total Savings</p>
                                             <p className="text-xs text-emerald-500 mt-1">Discount applied</p>
                                         </div>
-                                        <h3 className="text-lg font-bold text-emerald-600">
-                                            ₹{cart.original_total - cart.final_total}
-                                        </h3>
+                                        <h3 className="text-lg font-bold text-emerald-600">₹{cart.original_total - cart.final_total}</h3>
                                     </div>
                                 </div>
 
