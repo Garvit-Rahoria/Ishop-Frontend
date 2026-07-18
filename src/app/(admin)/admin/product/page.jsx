@@ -77,7 +77,7 @@ export default async function ProductPage() {
                       <td className="p-4">
                         <img
                           className="w-10 h-10 object-cover rounded"
-                          src={`${process.env.NEXT_PUBLIC_PRODUCT_IMAGE}/${prod.thumbnail}`}
+                          src={prod.thumbnail || "/placeholder.png"}
                           alt={prod.name}
                         />
                       </td>

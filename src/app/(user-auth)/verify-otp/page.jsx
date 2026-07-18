@@ -44,8 +44,11 @@ const OtpPage = () => {
                 notify(response.data.message, response.data.success);
 
                 if (response.data.success) {
-                    
-                    router.push("/login");
+                    // Save token — user is now verified and auto-logged in
+                    if (response.data.data?.token) {
+                        localStorage.setItem("jwt", response.data.data.token);
+                    }
+                    router.push("/");
                 }
             })
             .catch((error) => {

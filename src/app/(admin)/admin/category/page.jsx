@@ -75,7 +75,7 @@ export default async function CategoryPage() {
                       <td className="p-4">
                         <img
                           className="w-10 h-10 object-cover rounded"
-                          src={`${process.env.NEXT_PUBLIC_CATEGORY_IMAGE}/${cat.image}`}
+                          src={cat.image || "/placeholder.png"}
                           alt={cat.name}
                         />
                       </td>

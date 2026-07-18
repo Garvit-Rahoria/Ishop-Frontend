@@ -75,7 +75,7 @@ export default async function BrandPage() {
                       <td className="p-4">
                         <img
                           className="w-20 h-10 object-cover rounded"
-                          src={`${process.env.NEXT_PUBLIC_BRAND_IMAGE}/${brand.image}`}
+                          src={brand.image || "/placeholder.png"}
                           alt={brand.name}
                         />
                       </td>
