@@ -1,11 +1,20 @@
 'use client'
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import CartItem from "./CartItem";
 import OrderSummary from "./OrderSummary";
+import { lsToCart } from "@/redux/features/cartSlice";
 
 const CartPage = () => {
 
     const cart = useSelector((store) => store.cart);
+    const dispatch = useDispatch();
+    const [hydrated, setHydrated] = useState(false);
+
+    useEffect(() => {
+        dispatch(lsToCart());
+        setHydrated(true);
+    }, [dispatch]);
 
     return (
         <>
@@ -21,8 +30,8 @@ const CartPage = () => {
                             {cart?.items?.length === 0 ? (
                                 <p>Your cart is empty 🛒</p>
                             ) : (
-                                cart.items.map((item) => (
-                                    <CartItem key={item.id} item={item} />
+                                cart.items.map((item, index) => (
+                                    <CartItem key={item.id || item._id || index} item={item} />
                                 ))
                             )}
 
@@ -30,7 +39,7 @@ const CartPage = () => {
 
                         {/* Order Summary */}
                         <div className="lg:col-span-4">
-                            <OrderSummary />
+                            <OrderSummary hydrated={hydrated} />
                         </div>
 
                     </div>

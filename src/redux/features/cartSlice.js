@@ -65,13 +65,25 @@ export const cartSlice = createSlice({
         },
         lsToCart: (state) => {
             if (typeof window === "undefined") return;
-            const cart = JSON.parse(localStorage.getItem("cart"))
-            if (cart) {
-                state.items = cart.items;
-                state.final_total = Number(cart.final_total);
-                state.original_total = Number(cart.original_total);
-
+            let cart;
+            try {
+                cart = JSON.parse(localStorage.getItem("cart"));
+            } catch (_) {
+                cart = null;
             }
+
+            const items = Array.isArray(cart?.items) ? cart.items : [];
+            state.items = items;
+            // Always derive totals from actual items; saved totals can be stale.
+            state.original_total = items.reduce(
+                (sum, item) => sum + Number(item.orginal_price || 0) * Number(item.qty || 1),
+                0
+            );
+            state.final_total = items.reduce(
+                (sum, item) => sum + Number(item.final_price || 0) * Number(item.qty || 1),
+                0
+            );
+            localStorage.setItem("cart", JSON.stringify(state));
         }
 
     },

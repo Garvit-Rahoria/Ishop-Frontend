@@ -67,6 +67,7 @@ const CheckoutPage = () => {
                 localCart: JSON.stringify(
                     cart.items.map((item) => ({ id: item.id, qty: item.qty }))
                 ),
+                replace: true,
             });
 
             const response = await client.post('/order/create', {
