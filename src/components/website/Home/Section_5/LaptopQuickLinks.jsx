@@ -1,35 +1,45 @@
-import Image from 'next/image'
+import Link from 'next/link'
+import {
+    FaLaptop,
+    FaDesktop,
+    FaBriefcase,
+    FaLaptopCode,
+    FaMicrochip,
+    FaRecycle,
+} from 'react-icons/fa'
 
-const categories = [
-    { name: 'Macbook', items: 74, icon: '/icons/macbook.png' },
-    { name: 'Gaming PC', items: 5, icon: '/icons/gaming-pc.png' },
-    { name: 'Laptop Office', items: 22, icon: '/icons/laptop-office.png' },
-    { name: 'Laptop 15"', items: 55, icon: '/icons/laptop-15.png' },
-    { name: 'M1 2023', items: 32, icon: '/icons/m1.png' },
-    { name: 'Secondhand', items: 16, icon: '/icons/secondhand.png' },
+const links = [
+    { name: 'Macbook', icon: FaLaptop, href: '/products' },
+    { name: 'Gaming PC', icon: FaDesktop, href: '/products' },
+    { name: 'Laptop Office', icon: FaBriefcase, href: '/products' },
+    { name: 'Laptop 15"', icon: FaLaptopCode, href: '/products' },
+    { name: 'M1 2023', icon: FaMicrochip, href: '/products' },
+    { name: 'Secondhand', icon: FaRecycle, href: '/products' },
 ]
 
 export default function LaptopQuickLinks() {
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {categories.map((cat, i) => (
-                <div key={i} className="flex items-center gap-3">
-
-                    <div className="relative w-10 h-10">
-                        <Image
-                            src={cat.icon}
-                            alt={cat.name}
-                            fill
-                            className="object-contain"
-                        />
-                    </div>
-
-                    <div>
-                        <p className="text-sm font-medium">{cat.name}</p>
-                        <p className="text-xs text-gray-500">{cat.items} Items</p>
-                    </div>
-                </div>
-            ))}
+            {links.map((item) => {
+                const Icon = item.icon
+                return (
+                    <Link
+                        key={item.name}
+                        href={item.href}
+                        className="flex items-center gap-3 group"
+                    >
+                        <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:bg-teal-500 group-hover:text-white transition">
+                            <Icon size={18} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium group-hover:text-teal-600">
+                                {item.name}
+                            </p>
+                            <p className="text-xs text-gray-500">Shop now</p>
+                        </div>
+                    </Link>
+                )
+            })}
         </div>
     )
 }

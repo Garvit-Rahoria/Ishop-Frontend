@@ -15,7 +15,7 @@ export default function SectionOne() {
                 <CategorySidebar  />
                 <HeroBanner />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 items-stretch">
                 <FeaturedBrands />
                 <TopCategories />
             </div>

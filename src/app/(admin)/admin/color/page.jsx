@@ -19,13 +19,13 @@ export default async function ColorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-2.5">
-      <div className="bg-white rounded-2xl shadow p-6">
+    <div className="p-4 md:p-6">
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 md:p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Color Management</h1>
 
           <Link href="/admin/color/create">
-            <button className="flex items-center gap-2 bg-blue-950 text-white px-5 py-2 rounded-xl hover:bg-blue-900 cursor-pointer">
+            <button className="flex items-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-xl hover:bg-teal-700 cursor-pointer">
               <FiPlus />
               Add Color
             </button>
@@ -34,7 +34,7 @@ export default async function ColorPage() {
 
         <div className="overflow-hidden rounded-xl border">
           <table className="w-full">
-            <thead className="bg-gray-100 text-gray-600 text-sm">
+            <thead className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
               <tr>
                 <th className="text-left p-4">Color</th>
                 <th className="text-left p-4">Name</th>
@@ -79,7 +79,7 @@ export default async function ColorPage() {
                     <td className="p-4">
                       <div className="flex justify-center gap-3">
                         <Link href={`/admin/color/edit/${col._id}`}>
-                          <button className="bg-orange-100 text-orange-500 p-2 cursor-pointer rounded-lg hover:bg-orange-200">
+                          <button className="bg-teal-50 text-teal-600 p-2 cursor-pointer rounded-lg hover:bg-teal-100">
                             <FaEdit />
                           </button>
                         </Link>

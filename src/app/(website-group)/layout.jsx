@@ -1,7 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import '../globals.css'
+import './globals.css'
 import Header from "@/components/website/global/Header";
 import Footer from "@/components/website/global/Footer";
+import AppToaster from "@/components/AppToaster";
 import ReduxProvider from "@/redux/ReduxProvider";
 import NextTopLoader from 'nextjs-toploader';
 import { getMe } from "@/api/api-call";
@@ -28,18 +29,14 @@ export default async function RootLayout({ children }) {
     <html lang="en"
       className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f3f4f6]`}
     >
-      <body
-
-      >
+      <body>
         <ReduxProvider>
+          <AppToaster />
           <Header user={user} />
-          <NextTopLoader color="#009688"
-          height={4}
-          showSpinner={false}/>
+          <NextTopLoader color="#009688" height={4} showSpinner={false} />
           {children}
           <Footer />
         </ReduxProvider>
-
       </body>
     </html>
   );

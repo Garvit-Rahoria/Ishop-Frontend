@@ -2,19 +2,17 @@ import { FaShoppingBag } from "react-icons/fa";
 
 export default function Logo({ open }) {
   return (
-    <div className="flex items-center gap-2">
-      {/* Icon */}
-      <div className="bg-blue-950 text-white p-2 rounded-lg">
+    <div className="flex items-center gap-2.5 min-w-0">
+      <div className="bg-teal-700 text-white p-2 rounded-lg shrink-0 shadow-sm">
         <FaShoppingBag className="text-lg" />
       </div>
 
-      {/* Text */}
-      {open && (
-        <div className="leading-tight">
-          <h1 className="text-xl font-bold text-blue-950">Ishop</h1>
-          <p className="text-xs text-gray-500">Admin Panel</p>
+      {open ? (
+        <div className="leading-tight min-w-0">
+          <h1 className="text-base font-bold text-teal-950 truncate">Swoo</h1>
+          <p className="text-[11px] text-teal-800/70">Admin Panel</p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

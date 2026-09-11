@@ -1,48 +1,48 @@
 "use client";
 
 import React from "react";
-import { Bell, Search } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { client } from "@/utils/helper";
+import { clearAuthCookie } from "@/utils/authCookie";
 
-export default function Header() {
+export default function Header({ onMenuClick }) {
+  const handleLogout = async () => {
+    try {
+      await client.post("/user/logout");
+    } catch (_) {}
+    localStorage.removeItem("jwt");
+    await clearAuthCookie();
+    window.location.href = "/admin";
+  };
+
   return (
-    <header className="w-full h-[70px] bg-gray-200 text-gray-800 flex items-center justify-between px-6 sticky top-0 z-50 border-b shadow-sm">
-      
-     
-
-      {/* Center - Search */}
-      <div className="hidden md:flex items-center bg-gray-100 px-3 py-2 rounded-lg w-[300px]">
-        <Search size={18} className="text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search..."
-          className="bg-transparent outline-none ml-2 w-full text-sm placeholder-gray-400"
-        />
+    <header className="w-full h-[64px] md:h-[70px] bg-white text-gray-800 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 border-b border-gray-100">
+      <div className="flex items-center gap-3">
+        {onMenuClick ? (
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            aria-label="Open menu"
+          >
+            <span className="block w-5 h-0.5 bg-gray-700 mb-1" />
+            <span className="block w-5 h-0.5 bg-gray-700 mb-1" />
+            <span className="block w-5 h-0.5 bg-gray-700" />
+          </button>
+        ) : null}
+        <h1 className="font-semibold text-gray-800 text-sm md:text-base">
+          Swoo Admin
+        </h1>
       </div>
 
-      {/* Right - Icons & Profile */}
-      <div className="flex items-center gap-5">
-        
-        {/* Notification */}
-        <div className="relative cursor-pointer">
-          <Bell size={22} className="text-gray-600" />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-            3
-          </span>
-        </div>
-
-        {/* Profile */}
-        <div className="flex items-center gap-2 cursor-pointer">
-          <img
-            src="https://i.pravatar.cc/40"
-            alt="profile"
-            className="w-9 h-9 rounded-full"
-          />
-          <span className="hidden sm:block text-sm font-medium">
-            Admin
-          </span>
-        </div>
-
-      </div>
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="flex items-center gap-2 text-sm text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition"
+      >
+        <LogOut size={18} />
+        <span className="hidden sm:inline">Logout</span>
+      </button>
     </header>
   );
 }

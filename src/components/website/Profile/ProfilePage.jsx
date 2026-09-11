@@ -1,48 +1,59 @@
 'use client'
 
-import Image from "next/image";
-import { client } from "@/utils/helper";
+import { client, notify } from "@/utils/helper";
 import { useState, useEffect } from "react";
 import {
     FiMail,
     FiPhone,
 } from "react-icons/fi";
+import Link from "next/link";
+import { resolveMediaUrl } from "@/utils/media";
 
 const ProfilePage = ({ user }) => {
 
-    const [addAddress, setAddresses] = useState([]);
+    const [addresses, setAddresses] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const [form, setForm] = useState({
+    const emptyForm = {
         fullName: '',
         mobile: '',
         pincode: '',
         addressLine: '',
         city: '',
-        state: ''
-    });
+        state: '',
+        country: 'India',
+    };
 
-    // User data set
+    const [form, setForm] = useState(emptyForm);
+
     useEffect(() => {
-        if (user) {
-            setForm({
-                fullName: user.fullName || '',
-                mobile: user.mobile || '',
-                pincode: user.pincode || '',
-                addressLine: user.addressLine || '',
-                city: user.city || '',
-                state: user.state || ''
+        setAddresses(Array.isArray(user?.addresses) ? user.addresses : []);
+    }, [user]);
+
+    useEffect(() => {
+        let cancelled = false;
+        setOrdersLoading(true);
+        client
+            .get("/order/my")
+            .then((res) => {
+                if (!cancelled) {
+                    setOrders(Array.isArray(res.data?.data) ? res.data.data : []);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setOrders([]);
+            })
+            .finally(() => {
+                if (!cancelled) setOrdersLoading(false);
             });
-        }
-    }, [user]);
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
-    // Refresh ke baad bhi address show honge
-    useEffect(() => {
-        if (user?.addresses) {
-            setAddresses(user.addresses);
-        }
-    }, [user]);
-
-    // Handle Change
     const handleChange = (e) => {
         setForm({
             ...form,
@@ -50,31 +61,32 @@ const ProfilePage = ({ user }) => {
         });
     };
 
-    // Submit
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
+        setLoading(true);
 
-        client.post('/user/addAddress', form)
+        const payload = {
+            ...form,
+            country: form.country?.trim() || "India",
+        };
 
+        client.post('/user/addAddress', payload)
             .then((res) => {
-                console.log(res);
-
-                // Backend se updated addresses array
-                setAddresses(res.data.addAddress);
-
-                setForm({
-                    fullName: '',
-                    mobile: '',
-                    pincode: '',
-                    addressLine: '',
-                    city: '',
-                    state: ''
-                });
+                const next = res.data?.addresses || res.data?.addAddress || [];
+                setAddresses(Array.isArray(next) ? next : []);
+                setForm(emptyForm);
+                notify(res.data?.message || "Address saved", true);
             })
-
             .catch((err) => {
-                console.log(err);
-            });
+                const message =
+                    err?.response?.data?.message ||
+                    err?.message ||
+                    "Failed to add address";
+                setError(message);
+                notify(message, false);
+            })
+            .finally(() => setLoading(false));
     };
     return (
         <section className="bg-gray-50 min-h-screen py-10">
@@ -104,14 +116,10 @@ const ProfilePage = ({ user }) => {
 
                                     <div className="-mt-16 relative">
 
-                                        <div className="w-32 h-32 rounded-3xl overflow-hidden border-[6px] border-white shadow-2xl bg-white">
-                                            <Image
-                                                src="https://t4.ftcdn.net/jpg/09/59/21/77/360_F_959217710_7tXOGV30gaUOjgGuMvnFzAwZhOOXbgvd.jpg"
-                                                alt="Profile"
-                                                width={300}
-                                                height={300}
-                                                className="object-cover w-full h-full"
-                                            />
+                                        <div className="w-32 h-32 rounded-3xl overflow-hidden border-[6px] border-white shadow-2xl bg-teal-50 flex items-center justify-center">
+                                            <span className="text-4xl font-bold text-teal-600">
+                                                {(user?.name || "U").charAt(0).toUpperCase()}
+                                            </span>
                                         </div>
 
                                         {/* Online Dot */}
@@ -123,11 +131,13 @@ const ProfilePage = ({ user }) => {
                                 <div className="text-center mt-5">
 
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        Rahul Sharma
+                                        {user?.name || "User"}
                                     </h2>
 
-                                    <p className="text-gray-500 text-sm mt-1">
-                                        Premium Member
+                                    <p className="text-gray-500 text-sm mt-1 capitalize">
+                                        {user?.role === "admin" || user?.role === "superAdmin"
+                                            ? "Admin account"
+                                            : "Customer"}
                                     </p>
                                 </div>
 
@@ -145,8 +155,8 @@ const ProfilePage = ({ user }) => {
                                                 Email
                                             </p>
 
-                                            <p className="text-sm font-medium text-gray-700">
-                                                rahul@example.com
+                                            <p className="text-sm font-medium text-gray-700 break-all">
+                                                {user?.email || "—"}
                                             </p>
                                         </div>
                                     </div>
@@ -163,7 +173,9 @@ const ProfilePage = ({ user }) => {
                                             </p>
 
                                             <p className="text-sm font-medium text-gray-700">
-                                                +91 9876543210
+                                                {addresses?.[0]?.mobile
+                                                    ? `+91 ${addresses[0].mobile}`
+                                                    : "Add an address to save phone"}
                                             </p>
                                         </div>
                                     </div>
@@ -185,7 +197,7 @@ const ProfilePage = ({ user }) => {
                             </h2>
 
                             {
-                                addAddress.length === 0 ? (
+                                addresses.length === 0 ? (
                                     <div className="h-[250px] flex items-center justify-center">
 
                                         <div className="text-center">
@@ -200,7 +212,7 @@ const ProfilePage = ({ user }) => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                                         {
-                                            addAddress.map((item, index) => (
+                                            addresses.map((item, index) => (
                                                 <div
                                                     key={index}
                                                     className="border border-gray-200 rounded-2xl p-5 shadow-sm"
@@ -249,13 +261,13 @@ const ProfilePage = ({ user }) => {
                                 </div>
 
                                 <div className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-5 py-2 rounded-2xl shadow-lg text-sm font-semibold">
-                                    {addAddress.length} Address
+                                    {addresses.length} Address
                                 </div>
 
                             </div>
 
                             {
-                                addAddress.length === 0 ? (
+                                addresses.length === 0 ? (
 
                                     <div className="h-[280px] flex items-center justify-center">
 
@@ -304,7 +316,7 @@ const ProfilePage = ({ user }) => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                                         {
-                                            addAddress.map((item, index) => (
+                                            addresses.map((item, index) => (
 
                                                 <div
                                                     key={index}
@@ -414,23 +426,10 @@ const ProfilePage = ({ user }) => {
 
                                                     </div>
 
-                                                    {/* Buttons */}
-                                                    <div className="relative flex items-center gap-3 mt-8">
-
-                                                        <button
-                                                            className="flex-1 bg-gradient-to-r from-teal-500 to-emerald-500 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 text-white py-3 rounded-2xl font-semibold"
-                                                        >
-                                                            Edit Address
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => handleDelete(item._id)}
-                                                            className="bg-red-50 hover:bg-red-500 hover:text-white transition-all duration-300 text-red-500 px-5 py-3 rounded-2xl font-semibold"
-                                                        >
-                                                            Delete
-                                                        </button>
-
-                                                    </div>
+                                                    {/* Address is managed via Add Address form below */}
+                                                    <p className="relative mt-6 text-xs text-gray-400">
+                                                        To update, add a new delivery address below.
+                                                    </p>
 
                                                 </div>
                                             ))
@@ -444,6 +443,79 @@ const ProfilePage = ({ user }) => {
 
                     </div>
 
+                </div>
+
+                {/* My Orders */}
+                <div className="mt-10 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold text-gray-800">My Orders</h2>
+                        <Link href="/products" className="text-sm text-teal-600 hover:underline">
+                            Continue shopping
+                        </Link>
+                    </div>
+                    {ordersLoading ? (
+                        <p className="text-sm text-gray-500 py-8 text-center">Loading orders…</p>
+                    ) : orders.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 py-10 text-center">
+                            <p className="text-gray-700 font-medium">No orders yet</p>
+                            <p className="text-sm text-gray-500 mt-1">Your placed orders will appear here.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {orders.map((order) => (
+                                <div
+                                    key={order._id}
+                                    className="border border-gray-100 rounded-2xl p-4 hover:bg-gray-50/80 transition"
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                        <div>
+                                            <p className="text-xs text-gray-400">Order ID</p>
+                                            <p className="font-mono text-sm font-semibold text-gray-800 break-all">
+                                                {order._id}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 capitalize">
+                                                {order.orderStatus || order.paymentStatus || "placed"}
+                                            </span>
+                                            <p className="text-sm font-bold text-gray-800 mt-1">
+                                                ₹{order.totalAmount}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        {(order.items || []).slice(0, 4).map((item, idx) => {
+                                            const p = item.product_id;
+                                            const thumb = resolveMediaUrl("", p?.thumbnail);
+                                            return (
+                                                <div key={idx} className="flex items-center gap-2 text-xs text-gray-600">
+                                                    {thumb ? (
+                                                        <img
+                                                            src={thumb}
+                                                            alt=""
+                                                            className="w-10 h-10 object-contain rounded border bg-white"
+                                                            onError={(e) => {
+                                                                e.currentTarget.src = "/placeholder.svg";
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <span>
+                                                        {p?.name || "Product"} × {item.qty}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        {order.createdAt
+                                            ? new Date(order.createdAt).toLocaleString("en-IN")
+                                            : ""}
+                                        {order.paymentMethod ? ` · ${String(order.paymentMethod).toUpperCase()}` : ""}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Form Section */}
@@ -600,16 +672,36 @@ const ProfilePage = ({ user }) => {
 
                                 </div>
 
+                                {/* Country */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                        Country
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="country"
+                                        placeholder="Enter country"
+                                        value={form.country}
+                                        onChange={handleChange}
+                                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-700 outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300"
+                                    />
+                                </div>
+
+                                {error ? (
+                                    <p className="text-red-500 text-sm font-medium">{error}</p>
+                                ) : null}
+
                                 {/* Button */}
                                 <div className="pt-4">
 
                                     <button
                                         type="submit"
-                                        className="group relative overflow-hidden bg-gradient-to-r from-teal-500 to-emerald-500 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 text-white px-10 py-4 rounded-2xl font-bold text-sm md:text-base"
+                                        disabled={loading}
+                                        className="group relative overflow-hidden bg-gradient-to-r from-teal-500 to-emerald-500 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 text-white px-10 py-4 rounded-2xl font-bold text-sm md:text-base disabled:opacity-60"
                                     >
 
                                         <span className="relative z-10">
-                                            Save Account
+                                            {loading ? "Saving..." : "Save Address"}
                                         </span>
 
                                         <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>

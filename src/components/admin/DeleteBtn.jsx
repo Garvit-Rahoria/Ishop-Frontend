@@ -17,7 +17,7 @@ function DeleteBtn({ API, value, id }) {
             text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
+            confirmButtonColor: "#0d9488",
             cancelButtonColor: "#d33",
             confirmButtonText: "Yes, delete it!"
         }).then(async (result) => {
@@ -46,16 +46,7 @@ function DeleteBtn({ API, value, id }) {
 
     }
 
-    const base = "px-3 py-1 rounded-full text-sm font-medium cursor-pointer";
-
     return (
-        // <button
-        //     onClick={deleteHandler}
-        //     className={` ${base} ${value ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
-        //         }`}
-        // >
-        //    <FaTrash />    
-        // </button>
         <button onClick={deleteHandler} className="bg-red-100 text-red-500 p-2 rounded-lg cursor-pointer hover:bg-red-200">
             <FaTrash />
         </button>

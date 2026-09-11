@@ -187,9 +187,8 @@ export default function AddProduct({ params }) {
             slugRef.current.value = data.slug
             orginal_price.current.value = data.orginal_price
             final_price.current.value = data.final_price
-            discount_percent.current.value = data.discount_percent
+            discount_percent.current.value = data.discount_percentage ?? data.discount_percent
             setText(data.long_description)
-            setImage(data.thumbnail)
             setShortDesc(data.short_description)
 
             // Category pre-select
@@ -207,8 +206,8 @@ export default function AddProduct({ params }) {
                 setSelColor(data.colorId.map(c => ({ value: c._id, label: c.name })))
             }
 
-            // thumbnail
-            setImage(`http://localhost:5000/product/${data.thumbnail}`)
+            // thumbnail — Cloudinary stores full https URL
+            setImage(data.thumbnail)
 
 
 
@@ -226,8 +225,8 @@ export default function AddProduct({ params }) {
     )
 
     return (
-        <form onSubmit={submitHandler} className="p-3 bg-gray-100 min-h-screen">
-            <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6 space-y-6">
+        <form onSubmit={submitHandler} className="p-4 md:p-6">
+            <div className="max-w-5xl mx-auto bg-white border border-gray-100 rounded-xl shadow-sm p-4 md:p-6 space-y-6">
 
                 {/* Title */}
                 <h2 className="text-2xl font-bold">Edit Product</h2>
@@ -375,7 +374,7 @@ export default function AddProduct({ params }) {
 
                     <div
                         onClick={() => fileRef.current.click()}
-                        className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-950 transition"
+                        className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 transition"
                     >
                         <FiUploadCloud className="mx-auto text-3xl text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500">
@@ -397,7 +396,7 @@ export default function AddProduct({ params }) {
 
                 {/* Submit */}
                 <div className="flex justify-end">
-                    <button type="submit" className="bg-blue-950 hover:bg-blue-900 cursor-pointer text-white px-6 py-2 rounded-lg">
+                    <button type="submit" className="bg-teal-600 hover:bg-teal-700 cursor-pointer text-white px-6 py-2 rounded-lg">
                         {loading ? "Updating..." : "Edit Product"}
                     </button>
                 </div>

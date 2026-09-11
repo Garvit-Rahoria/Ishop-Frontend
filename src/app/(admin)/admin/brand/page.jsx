@@ -5,6 +5,7 @@ import { FaEdit } from 'react-icons/fa'
 import { FiPlus } from 'react-icons/fi'
 import StatusBtn from '@/components/admin/StatusBtn'
 import DeleteBtn from '@/components/admin/DeleteBtn'
+import { resolveMediaUrl } from '@/utils/media'
 
 export const dynamic = "force-dynamic";
 
@@ -17,19 +18,19 @@ export default async function BrandPage() {
     brands = res.data
     meta = res.meta || {}
   } catch (error) {
-    console.log(error)
+    brands = []
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-2.5">
-      <div className="bg-white rounded-2xl shadow p-6">
+    <div className="p-4 md:p-6">
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 md:p-6">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Brand Management</h1>
 
           <Link href="/admin/brand/create">
-            <button className="flex items-center gap-2 bg-blue-950 text-white px-5 py-2 rounded-xl hover:bg-blue-900 cursor-pointer">
+            <button className="flex items-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-xl hover:bg-teal-700 cursor-pointer">
               <FiPlus />
               Add Brand
             </button>
@@ -41,7 +42,7 @@ export default async function BrandPage() {
           <table className="w-full">
 
             {/* Table Head */}
-            <thead className="bg-gray-100 text-gray-600 text-sm">
+            <thead className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
               <tr>
                 <th className="text-left p-4">Image</th>
                 <th className="text-left p-4">Name</th>
@@ -75,7 +76,7 @@ export default async function BrandPage() {
                       <td className="p-4">
                         <img
                           className="w-20 h-10 object-cover rounded"
-                          src={brand.image || "/placeholder.png"}
+                          src={resolveMediaUrl(meta?.imageBaseUrl, brand.image)}
                           alt={brand.name}
                         />
                       </td>
@@ -121,7 +122,7 @@ export default async function BrandPage() {
 
                           {/* Edit */}
                           <Link href={`/admin/brand/edit/${brand._id}`}>
-                            <button className="bg-orange-100 text-orange-500 p-2 cursor-pointer rounded-lg hover:bg-orange-200">
+                            <button className="bg-teal-50 text-teal-600 p-2 cursor-pointer rounded-lg hover:bg-teal-100">
                               <FaEdit />
                             </button>
                           </Link>

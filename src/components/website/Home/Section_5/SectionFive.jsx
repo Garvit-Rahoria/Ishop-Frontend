@@ -1,63 +1,31 @@
+import Link from 'next/link'
 import LaptopPromoBanner from './LaptopPromoBanner'
 import LaptopQuickLinks from './LaptopQuickLinks'
 import BestSellerCard from '@/components/website/global/BestSellerCard'
+import { getProducts } from '@/api/api-call'
+import { resolveMediaUrl } from '@/utils/media'
 
-export default function SectionFive() {
-
-    const products = [
-        {
-            image: '/products/macbook.png',
-            title: 'Pineapple Macbook Pro 2022 M1 / 512 GB',
-            price: 579,
-            badges: ['FREE SHIPPING'],
-            stockStatus: 'In stock',
-        },
-        {
-            image: '/products/speaker.png',
-            title: 'C&O Bluetooth Speaker',
-            price: 979,
-            badges: ['FREE SHIPPING'],
-            stockStatus: 'In stock',
-            variants: ['/products/speaker.png', '/products/speaker-black.png'],
-        },
-        {
-            image: '/products/case.png',
-            title: 'Gigaby Customo Case, i7 / 16GB / SSD 256GB',
-            price: 1259,
-            badges: ['FREE SHIPPING', 'FREE GIFT'],
-            stockStatus: 'In stock',
-        },
-        {
-            image: '/products/pc-case.png',
-            title: 'BEOS PC Gaming Case',
-            price: 1239,
-            oldPrice: 1619,
-            save: 59,
-            stockStatus: 'Contact',
-        },
-        {
-            image: '/products/imac.png',
-            title: 'aMac All-in-one Computer M1',
-            price: 1729,
-            badges: ['FREE SHIPPING'],
-            stockStatus: 'Contact',
-        },
-    ]
+export default async function SectionFive() {
+    const productData = await getProducts({ status: true, is_top: true, limit: 8 })
+    let products = productData?.data || []
+    if (products.length === 0) {
+        const fallback = await getProducts({ status: true, limit: 8 })
+        products = fallback?.data || []
+    }
+    products = products.slice(0, 5)
 
     return (
         <section className="max-w-7xl mx-auto px-4 py-10">
-
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold">
-                    BEST LAPTOPS & COMPUTERS
-                </h3>
-                <span className="text-sm text-gray-500 hover:text-teal-500 cursor-pointer">
+                <h3 className="text-lg font-semibold">TOP LAPTOPS & COMPUTERS</h3>
+                <Link
+                    href="/products"
+                    className="text-sm text-gray-500 hover:text-teal-500"
+                >
                     View All
-                </span>
+                </Link>
             </div>
 
-            {/* Top Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <LaptopPromoBanner />
                 <div className="lg:col-span-2">
@@ -65,13 +33,24 @@ export default function SectionFive() {
                 </div>
             </div>
 
-            {/* Product Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {products.map((product, index) => (
-                    <BestSellerCard key={index} {...product} />
+                {products.map((product) => (
+                    <BestSellerCard
+                        key={product._id}
+                        href={product.slug ? `/product/${product.slug}` : undefined}
+                        image={resolveMediaUrl(
+                            productData?.meta?.imageBaseUrl,
+                            product.thumbnail
+                        )}
+                        title={product.name}
+                        price={product.final_price}
+                        oldPrice={product.orginal_price}
+                        save={product.discount_percentage}
+                        badges={product.stock ? ['IN STOCK'] : ['OUT OF STOCK']}
+                        stockStatus={product.stock ? 'In stock' : 'Out of stock'}
+                    />
                 ))}
             </div>
-
         </section>
     )
 }

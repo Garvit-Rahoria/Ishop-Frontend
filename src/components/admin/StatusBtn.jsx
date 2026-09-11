@@ -29,8 +29,10 @@ function StatusBtn({ value, url, field }) {
         is_home: ["Home", "Not home"],
         is_top: ["Top", "Not top"],
         is_popular: ["Popular", "Not popular"],
+        stock: ["In stock", "Out of stock"],
+        top_selling: ["Top", "Not top"],
     }
-    const [TrueLable, FalseLable] = lable[field] || { "Yes": "No" }
+    const [TrueLable, FalseLable] = lable[field] || ["Yes", "No"]
 
     const base = "px-3 py-1 rounded-full text-sm font-medium cursor-pointer";
 

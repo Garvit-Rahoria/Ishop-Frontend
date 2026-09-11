@@ -100,7 +100,11 @@ export default function EditBrand({ params }) {
             const { data, meta } = await getBrandById(id)
 
             setBrand(data)
-            setImage(`${meta?.imageBaseUrl}/${data.image}`)
+            setImage(
+                data.image?.startsWith("http")
+                    ? data.image
+                    : `${meta?.imageBaseUrl || ""}/${data.image || ""}`.replace(/([^:]\/)\/+/g, "$1")
+            )
 
             if (data.categoryId) {
                 setSelCategory(
@@ -216,7 +220,7 @@ export default function EditBrand({ params }) {
 
                         <div
                             onClick={() => fileRef.current.click()}
-                            className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-950 transition"
+                            className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 transition"
                         >
                             <FiUploadCloud className="mx-auto text-3xl text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500">
@@ -240,7 +244,7 @@ export default function EditBrand({ params }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-2.5 rounded-xl bg-blue-950 text-white font-medium hover:shadow-lg"
+                        className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium hover:shadow-lg"
                     >
                         {loading ? "waiting..." : "Edit"}
                     </button>

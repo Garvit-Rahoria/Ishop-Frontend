@@ -62,6 +62,13 @@ const CheckoutPage = () => {
         setLoading(true);
 
         try {
+            // Ensure DB cart matches local cart before placing order
+            await client.post('/cart/sync', {
+                localCart: JSON.stringify(
+                    cart.items.map((item) => ({ id: item.id, qty: item.qty }))
+                ),
+            });
+
             const response = await client.post('/order/create', {
                 address: addresses[selectedAddress],
                 paymentMethod,

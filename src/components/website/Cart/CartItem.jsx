@@ -2,6 +2,7 @@
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { qtyChange } from "@/redux/features/cartSlice";
+import { resolveMediaUrl } from "@/utils/media";
 
 const CartItem = ({ item }) => {
 
@@ -14,7 +15,7 @@ const CartItem = ({ item }) => {
                 {/* Product Image */}
                 <div className="relative w-full sm:w-32 h-40 sm:h-32 bg-gray-100 rounded-xl p-3 flex items-center justify-center overflow-hidden">
                     <img
-                        src={item.thumbnail}
+                        src={resolveMediaUrl("", item.thumbnail)}
                         alt={item.name}
                         className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                     />

@@ -108,7 +108,7 @@ export default function AddColor() {
             </label>
 
             <div
-              className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-blue-950 transition"
+              className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-teal-500 transition"
             >
               <input
               type="color"
@@ -122,7 +122,7 @@ export default function AddColor() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-blue-950 text-white font-medium hover:shadow-lg"
+            className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium hover:shadow-lg"
           >
             {loading ? "waiting..." : "Save"}
           </button>

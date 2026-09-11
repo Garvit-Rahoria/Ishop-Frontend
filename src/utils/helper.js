@@ -30,6 +30,9 @@ client.interceptors.request.use((config) => {
     return config;
 });
 
-const notify = (msg, flag) => toast(msg, { type: flag ? "success" : "error" });
+const notify = (msg, flag) => {
+    if (flag) toast.success(msg);
+    else toast.error(msg);
+};
 
 export { notify, client };

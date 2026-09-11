@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { client, notify } from "@/utils/helper";
+import { mirrorAuthCookie } from "@/utils/authCookie";
+import { resolveMediaUrl } from "@/utils/media";
 
 const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,79 +23,89 @@ const LoginForm = () => {
 
     const [form, setForm] = useState({
         email: "",
-        password: ""
+        password: "",
     });
 
     const handleChange = (e) => {
         setForm((prev) => ({
             ...prev,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        client.post("/user/login", form)
-            .then(async (response) => {
-                notify(response.data.message, response.data.success);
+        try {
+            const response = await client.post("/user/login", form);
+            notify(response.data.message, response.data.success);
 
-                if (response.data.success) {
-                    console.log(response)
-                    // Save token for authenticated requests
-                    if (response.data.data?.token) {
-                        localStorage.setItem("jwt", response.data.data.token);
-                    }
-                    router.push("/");
-                    // setForm({
-                    //     email: "",
-                    //     password: "",
-                    // });
+            if (!response.data.success) return;
 
-                    try {
-                        const cartRes = await client.post("/cart/sync", {
-                            localCart: JSON.stringify(Items)
-                        });
+            const token = response.data.data?.token;
+            if (token) {
+                localStorage.setItem("jwt", token);
+                await mirrorAuthCookie(token);
+            }
 
-                        console.log(cartRes.data, "cartRes")
+            try {
+                const cartRes = await client.post("/cart/sync", {
+                    localCart: JSON.stringify(Items),
+                });
 
-                        const cartData = cartRes.data?.cart;
-                        console.log(cartData)
-                        let final_total = 0;
-                        let original_total = 0;
-                        const items = cartData?.map((item) => {
-                            const { name, _id, orginal_price, final_price, discount_percentage, price, thumbnail, stock } = item.productId
-                            final_total += (final_price * item.qty)
-                            original_total += (orginal_price * item.qty)
-                            return {
-                                name, _id, orginal_price, final_price, discount_percentage, price, thumbnail: cartRes.data.imageBaseUrl + thumbnail, stock, qty: item.qty
-                            }
-                        })
+                const cartData = cartRes.data?.cart;
+                let final_total = 0;
+                let original_total = 0;
+                const items = (cartData || []).map((item) => {
+                    const {
+                        name,
+                        _id,
+                        orginal_price,
+                        final_price,
+                        discount_percentage,
+                        price,
+                        thumbnail,
+                        stock,
+                    } = item.productId || {};
+                    final_total += (final_price || 0) * item.qty;
+                    original_total += (orginal_price || 0) * item.qty;
+                    return {
+                        name,
+                        _id,
+                        orginal_price,
+                        final_price,
+                        discount_percentage,
+                        price,
+                        thumbnail: resolveMediaUrl(
+                            cartRes.data?.imageBaseUrl,
+                            thumbnail
+                        ),
+                        stock,
+                        qty: item.qty,
+                    };
+                });
 
-                        localStorage.setItem("cart", JSON.stringify({
-                            final_total,
-                            original_total,
-                            items
-                        }))
+                localStorage.setItem(
+                    "cart",
+                    JSON.stringify({ final_total, original_total, items })
+                );
+            } catch (_) {
+                /* cart sync is best-effort */
+            }
 
-                        
-
-                    } catch (error) {
-                        console.log(error)
-                    }
-
-                }
-                // router.push("/");
-            })
-            .catch((error) => {
-                const message =
-                    error?.response?.data?.message || "Internal Server Error";
-                notify(message, false);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            router.push("/");
+            router.refresh();
+        } catch (error) {
+            const message =
+                error?.response?.data?.message ||
+                (error?.code === "ERR_NETWORK" || !error?.response
+                    ? "Server offline — start API on port 5000"
+                    : "Login failed");
+            notify(message, false);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -106,10 +118,10 @@ const LoginForm = () => {
             </p>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-
-                {/* Email */}
                 <div>
-                    <label className="label">Email Address</label>
+                    <label className="label">
+                        Email Address <span className="text-red-500">*</span>
+                    </label>
                     <input
                         name="email"
                         type="email"
@@ -121,9 +133,10 @@ const LoginForm = () => {
                     />
                 </div>
 
-                {/* Password */}
                 <div className="relative">
-                    <label className="label">Password</label>
+                    <label className="label">
+                        Password <span className="text-red-500">*</span>
+                    </label>
                     <input
                         name="password"
                         type={showPassword ? "text" : "password"}
@@ -133,41 +146,37 @@ const LoginForm = () => {
                         value={form.password}
                         onChange={handleChange}
                     />
-                    <span
+                    <button
+                        type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-9 cursor-pointer text-gray-500"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                         {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
+                    </button>
                 </div>
 
-                {/* Forgot password */}
-                <div className="text-sm text-gray-400">
-                    <Link href="/forgot-password">
-                        Forget Password ?
+                <p className="text-sm text-gray-400">
+                    Forgot password?{" "}
+                    <Link href="/contact" className="text-teal-600 hover:underline">
+                        Contact support
                     </Link>
-                </div>
+                </p>
 
-                {/* Button */}
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-teal-600 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+                    className="w-full bg-teal-600 text-white py-3 rounded-lg font-medium disabled:opacity-50 hover:bg-teal-700 transition"
                 >
                     {loading ? "Please wait..." : "LOGIN"}
                 </button>
 
-                {/* Register link */}
                 <p className="text-sm text-center text-gray-500">
-                    NEW USER ?{" "}
-                    <Link
-                        href="/register"
-                        className="text-green-600 font-medium"
-                    >
+                    NEW USER?{" "}
+                    <Link href="/register" className="text-green-600 font-medium">
                         SIGN UP
                     </Link>
                 </p>
-
             </form>
         </div>
     );

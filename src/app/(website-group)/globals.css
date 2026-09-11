@@ -15,3 +15,11 @@
 .profile-menu.active {
     @apply bg-teal-600 text-white;
 }
+
+/* Keep toasts above sticky header */
+.Toastify {
+    z-index: 99999 !important;
+}
+.Toastify__toast-container {
+    z-index: 99999 !important;
+}

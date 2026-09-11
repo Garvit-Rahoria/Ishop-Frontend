@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { FaEye } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
-
+import { resolveMediaUrl } from '@/utils/media';
 export default function ViewBtn({ prod }) {
 
     const [toggle, setToggle] = useState(false)
@@ -12,7 +12,7 @@ export default function ViewBtn({ prod }) {
         <>
             <div
                 onClick={() => setToggle(true)}
-                className='bg-lime-100 text-lime-500 p-2 cursor-pointer rounded-lg hover:bg-lime-200 w-fit'
+                className='bg-teal-50 text-teal-600 p-2 cursor-pointer rounded-lg hover:bg-teal-100 w-fit'
             >
                 <FaEye />
             </div>
@@ -55,7 +55,7 @@ function Overlay({ onclose, prod }) {
                         {/* Main Image */}
                         <div className="border rounded-2xl overflow-hidden">
                             <img
-                                src={prod.thumbnail}
+                                src={resolveMediaUrl("", prod.thumbnail)}
                                 alt={prod.name}
                                 className="w-full h-[450px] object-cover"
                             />
@@ -71,7 +71,7 @@ function Overlay({ onclose, prod }) {
                                         className="border rounded-xl overflow-hidden"
                                     >
                                         <img
-                                           src={`${process.env.NEXT_PUBLIC_PRODUCT_IMAGE}/${img}`}
+                                           src={resolveMediaUrl(process.env.NEXT_PUBLIC_PRODUCT_IMAGE, img)}
                                             alt="product"
                                             className="w-full h-24 object-cover"
                                         />
@@ -183,15 +183,22 @@ function Overlay({ onclose, prod }) {
 
                         {/* Buttons */}
                         <div className="flex gap-4 flex-wrap mt-4">
-
-                            <button className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold">
-                                Add to Cart
-                            </button>
-
-                            <button className="border border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white px-6 py-3 rounded-xl font-semibold">
-                                Buy Now
-                            </button>
-
+                            {prod?.slug ? (
+                                <a
+                                    href={`/product/${prod.slug}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold"
+                                >
+                                    View on store
+                                </a>
+                            ) : null}
+                            <a
+                                href={`/admin/product/edit/${prod._id}`}
+                                className="border border-teal-500 text-teal-500 hover:bg-teal-500 hover:text-white px-6 py-3 rounded-xl font-semibold"
+                            >
+                                Edit product
+                            </a>
                         </div>
 
                     </div>

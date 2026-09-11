@@ -181,8 +181,8 @@ export default function AddProduct() {
     }
 
     return (
-        <form onSubmit={submitHandler} className="p-6 bg-gray-100 min-h-screen">
-            <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow p-6 space-y-6">
+        <form onSubmit={submitHandler} className="p-4 md:p-6">
+            <div className="max-w-5xl mx-auto bg-white border border-gray-100 rounded-xl shadow-sm p-4 md:p-6 space-y-6">
 
                 {/* Title */}
                 <h2 className="text-2xl font-semibold">Add Product</h2>
@@ -335,7 +335,7 @@ export default function AddProduct() {
 
                     <div
                         onClick={() => fileRef.current.click()}
-                        className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-950 transition"
+                        className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 transition"
                     >
                         <FiUploadCloud className="mx-auto text-3xl text-gray-400 mb-2" />
                         <p className="text-sm text-gray-500">
@@ -357,7 +357,7 @@ export default function AddProduct() {
 
                 {/* Submit */}
                 <div className="flex justify-end">
-                    <button type="submit" className="bg-blue-950 hover:bg-blue-900 cursor-pointer text-white px-6 py-2 rounded-lg">
+                    <button type="submit" className="bg-teal-600 hover:bg-teal-700 cursor-pointer text-white px-6 py-2 rounded-lg">
                         Add Product
                     </button>
                 </div>

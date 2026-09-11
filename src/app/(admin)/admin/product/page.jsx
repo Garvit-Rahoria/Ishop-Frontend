@@ -7,6 +7,7 @@ import StatusBtn from '@/components/admin/StatusBtn'
 import DeleteBtn from '@/components/admin/DeleteBtn'
 import { IoImages } from "react-icons/io5";
 import ViewBtn from '@/components/admin/ViewBtn'
+import { resolveMediaUrl } from '@/utils/media'
 
 export const dynamic = "force-dynamic";
 
@@ -24,15 +25,15 @@ export default async function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-2.5">
-      <div className="bg-white rounded-2xl shadow p-6">
+    <div className="p-4 md:p-6">
+      <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 md:p-6">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Product Management</h1>
 
           <Link href="/admin/product/create">
-            <button className="flex items-center gap-2 bg-blue-950 text-white px-5 py-2 rounded-xl hover:bg-blue-900 cursor-pointer">
+            <button className="flex items-center gap-2 bg-teal-600 text-white px-5 py-2 rounded-xl hover:bg-teal-700 cursor-pointer">
               <FiPlus />
               Add Product
             </button>
@@ -44,7 +45,7 @@ export default async function ProductPage() {
           <table className="w-full">
 
             {/* Table Head */}
-            <thead className="bg-gray-100 text-gray-600 text-sm">
+            <thead className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
               <tr>
                 <th className="text-left p-4">Thumbnail</th>
                 <th className="text-left p-4">Name</th>
@@ -77,7 +78,7 @@ export default async function ProductPage() {
                       <td className="p-4">
                         <img
                           className="w-10 h-10 object-cover rounded"
-                          src={prod.thumbnail || "/placeholder.png"}
+                          src={resolveMediaUrl(meta?.imageBaseUrl, prod.thumbnail) || "/placeholder.svg"}
                           alt={prod.name}
                         />
                       </td>
@@ -118,14 +119,14 @@ export default async function ProductPage() {
 
                           {/* Edit */}
                           <Link href={`/admin/product/edit/${prod._id}`}>
-                            <button className="bg-orange-100 text-orange-500 p-2 cursor-pointer rounded-lg hover:bg-orange-200">
+                            <button className="bg-teal-50 text-teal-600 p-2 cursor-pointer rounded-lg hover:bg-teal-100">
                               <FaEdit />
                             </button>
                           </Link>
 
                           {/* Add-images */}
                           <Link href={`/admin/product/add-images/${prod._id}`}>
-                            <button className="bg-purple-100 text-purple-500 p-2 cursor-pointer rounded-lg hover:bg-purple-200">
+                            <button className="bg-teal-50 text-teal-600 p-2 cursor-pointer rounded-lg hover:bg-teal-100">
                               <IoImages />
                             </button>
                           </Link>

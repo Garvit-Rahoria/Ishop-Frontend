@@ -108,8 +108,16 @@ const getProducts = async (query = {}) => {
         const filter = new URLSearchParams();
         if (query.status) filter.append("status", query.status)
         if (query.limit) filter.append("limit", query.limit)
+        if (query.page) filter.append("page", query.page)
+        if (query.q) filter.append("q", query.q)
+        if (query.search) filter.append("q", query.search)
+        if (query.slug) filter.append("slug", query.slug)
         if (query.id) filter.append("id", query.id)
-        if (query.category_slug) filter.append("category_slug", query.category_slug)
+        if (query.is_top) filter.append("is_top", query.is_top)
+        if (query.top_selling) filter.append("top_selling", query.top_selling)
+        if (query.category_slug && query.category_slug !== "all") {
+            filter.append("category_slug", query.category_slug)
+        }
         if (query.brand_slug) filter.append("brand_slug", query.brand_slug)
         if (query.color_slug) filter.append("color_slug", query.color_slug)
         if (query.min_price) filter.append("min_price", query.min_price)
@@ -140,6 +148,19 @@ const getProductById = async (id) => {
     }
 }
 
+const getProductBySlug = async (slug) => {
+    try {
+        const response = await client.get(`/product/slug/${encodeURIComponent(slug)}`)
+        if (!response.data.success) {
+            throw new Error(response.data.message || "Fail API")
+        }
+        return response.data
+    } catch (error) {
+        console.warn("getProductBySlug failed:", error?.response?.data || error.message)
+        return SAFE_EMPTY
+    }
+}
+
 const getMe = async () => {
     try {
         const cookieStore = await cookies();
@@ -165,6 +186,58 @@ const getMe = async () => {
     }
 }
 
+const getOrders = async () => {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("jwt")?.value ?? null;
+
+        if (!token) {
+            return { success: false, orders: [], count: 0 }
+        }
+
+        const response = await client.get("/order", {
+            headers: {
+                Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+            },
+        });
+
+        if (!response.data.success) {
+            return { success: false, orders: [], count: 0 }
+        }
+
+        return response.data
+    } catch (error) {
+        console.warn("getOrders failed:", error?.response?.data || error.message)
+        return { success: false, orders: [], count: 0 }
+    }
+}
+
+const getDashboard = async () => {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("jwt")?.value ?? null;
+
+        if (!token) {
+            return { success: false, data: null }
+        }
+
+        const response = await client.get("/dashboard", {
+            headers: {
+                Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+            },
+        });
+
+        if (!response.data.success) {
+            return { success: false, data: null }
+        }
+
+        return response.data
+    } catch (error) {
+        console.warn("getDashboard failed:", error?.response?.data || error.message)
+        return { success: false, data: null }
+    }
+}
+
 
 export {
     getCategories,
@@ -175,5 +248,8 @@ export {
     getColorsById,
     getProducts,
     getProductById,
-    getMe
+    getProductBySlug,
+    getMe,
+    getOrders,
+    getDashboard,
 }
