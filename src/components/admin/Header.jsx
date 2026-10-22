@@ -4,15 +4,32 @@ import React from "react";
 import { LogOut } from "lucide-react";
 import { client } from "@/utils/helper";
 import { clearAuthCookie } from "@/utils/authCookie";
+import Swal from "sweetalert2";
 
-export default function Header({ onMenuClick }) {
+export default function Header({ onMenuClick, onLoggedOut }) {
   const handleLogout = async () => {
-    try {
-      await client.post("/user/logout");
-    } catch (_) {}
+    const result = await Swal.fire({
+      title: "Log out?",
+      text: "Are you sure you want to log out of the admin panel?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#0d9488",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, log out",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
     localStorage.removeItem("jwt");
-    await clearAuthCookie();
-    window.location.href = "/admin";
+    onLoggedOut?.();
+
+    // Clear cookies in the background; a slow API must not block the UI.
+    void Promise.allSettled([
+      client.post("/user/logout"),
+      clearAuthCookie(),
+    ]);
   };
 
   return (

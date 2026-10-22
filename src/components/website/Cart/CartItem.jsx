@@ -1,7 +1,7 @@
 'use client'
 import { FaMinus, FaPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { qtyChange } from "@/redux/features/cartSlice";
+import { qtyChange, removeItem } from "@/redux/features/cartSlice";
 import { resolveMediaUrl } from "@/utils/media";
 
 const CartItem = ({ item }) => {
@@ -81,7 +81,13 @@ const CartItem = ({ item }) => {
                         </div>
 
                         {/* Optional Remove Button */}
-                        <button className="text-sm text-red-500 hover:text-red-700 transition">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                dispatcher(removeItem({ id: item.id ?? item._id }))
+                            }
+                            className="text-sm text-red-500 hover:text-red-700 transition cursor-pointer"
+                        >
                             Remove
                         </button>
                     </div>

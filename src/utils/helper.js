@@ -17,6 +17,7 @@ if (!API_BASE_URL) {
 const client = axios.create({
     baseURL: API_BASE_URL || undefined,
     withCredentials: true,
+    timeout: 15000,
 });
 
 // Attach JWT token at request time — browser only, never during SSR

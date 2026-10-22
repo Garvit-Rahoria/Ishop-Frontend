@@ -110,7 +110,10 @@ const CheckoutPage = () => {
 
                             if (verifyRes.data.success) {
                                 dispatch(emptyCart());
-                                router.push(`/thank-you?orderId=${verifyRes.data.orderId}`);
+                                // sendSuccess wraps the payload inside `data`.
+                                const verifiedOrderId =
+                                    verifyRes.data.data?.orderId || verifyRes.data.orderId;
+                                router.push(`/thank-you?orderId=${verifiedOrderId || ''}`);
                             } else {
                                 notify(verifyRes.data.message || 'Payment verification failed', false);
                             }

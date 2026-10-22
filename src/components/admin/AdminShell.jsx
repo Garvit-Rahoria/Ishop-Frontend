@@ -19,6 +19,14 @@ export default function AdminShell({ children }) {
     })
 
     const checkAdmin = async () => {
+        // The admin session is established by the client login flow. If the
+        // local token is gone, always show the login screen even when an old
+        // API cookie could not be cleared because of a network/CORS failure.
+        if (!localStorage.getItem('jwt')) {
+            setStatus('login')
+            return
+        }
+
         try {
             const res = await client.get('/user/get')
             const user = res.data?.user
@@ -192,7 +200,10 @@ export default function AdminShell({ children }) {
         <div className="flex min-h-screen w-full bg-gray-50 overflow-x-hidden">
             <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
             <div className="flex-1 flex flex-col min-w-0">
-                <Header onMenuClick={() => setMobileOpen(true)} />
+                <Header
+                    onMenuClick={() => setMobileOpen(true)}
+                    onLoggedOut={() => setStatus('login')}
+                />
                 <main className="flex-1">{children}</main>
             </div>
         </div>

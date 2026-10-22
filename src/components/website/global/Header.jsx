@@ -14,13 +14,14 @@ import {
 } from 'react-icons/fi'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
-import { lsToCart } from '@/redux/features/cartSlice'
+import { emptyCart, lsToCart } from '@/redux/features/cartSlice'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MdLogout } from 'react-icons/md'
 import { client } from '@/utils/helper'
 import { clearAuthCookie } from '@/utils/authCookie'
 import { useRouter } from 'next/navigation'
+import Swal from 'sweetalert2'
 
 export default function Header({ user }) {
     const cart = useSelector((store) => store.cart)
@@ -35,13 +36,40 @@ export default function Header({ user }) {
         dispatcher(lsToCart())
     }, [dispatcher])
 
+    // Admin accounts do not use the customer shopping cart. Clear any stale
+    // cart left in this browser from an earlier test session.
+    useEffect(() => {
+        if (user?.role === 'admin' || user?.role === 'superAdmin') {
+            dispatcher(emptyCart())
+        }
+    }, [dispatcher, user?.role])
+
     const handleLogout = async () => {
-        try {
-            await client.post('/user/logout')
-        } catch (_) {}
+        const result = await Swal.fire({
+            title: 'Log out?',
+            text: 'Are you sure you want to log out of your account?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0d9488',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, log out',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        })
+
+        if (!result.isConfirmed) return
+
+        dispatcher(emptyCart())
         localStorage.removeItem('jwt')
-        await clearAuthCookie()
-        window.location.href = '/login'
+        setOpen(false)
+
+        // Do not block navigation on a slow or CORS-blocked API request.
+        void Promise.allSettled([
+            client.post('/user/logout'),
+            clearAuthCookie(),
+        ])
+
+        window.location.replace('/login')
     }
 
     const handleSearch = (e) => {
