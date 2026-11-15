@@ -31,14 +31,14 @@ const socials = [
 const ContactInfo = () => {
     return (
         <div className="space-y-5">
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 space-y-6">
+            <div className="rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-sm p-6 space-y-6 transition-colors">
                 <div className="flex items-start gap-3">
-                    <span className="shrink-0 w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <span className="shrink-0 w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 border border-teal-100 dark:border-teal-800/40 flex items-center justify-center">
                         <FiHeadphones size={18} />
                     </span>
                     <div>
-                        <h3 className="font-bold text-gray-900">Talk to our team</h3>
-                        <p className="text-sm text-gray-500 mt-0.5">
+                        <h3 className="font-bold text-gray-900 dark:text-slate-100">Talk to our team</h3>
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
                             Prefer email or call? Reach us here anytime during business hours.
                         </p>
                     </div>
@@ -47,22 +47,22 @@ const ContactInfo = () => {
                 {offices.map((office) => (
                     <div
                         key={office.tag}
-                        className="rounded-xl bg-slate-50 border border-slate-100 p-4 space-y-2.5"
+                        className="rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 p-4 space-y-2.5"
                     >
-                        <p className="text-[11px] font-semibold tracking-wider uppercase text-teal-700">
+                        <p className="text-[11px] font-semibold tracking-wider uppercase text-teal-700 dark:text-teal-400">
                             {office.tag}
                         </p>
-                        <p className="flex items-start gap-2 text-sm text-gray-700">
-                            <FiMapPin className="mt-0.5 shrink-0 text-teal-600" size={14} />
+                        <p className="flex items-start gap-2 text-sm text-gray-700 dark:text-slate-300">
+                            <FiMapPin className="mt-0.5 shrink-0 text-teal-600 dark:text-teal-400" size={14} />
                             {office.address}
                         </p>
-                        <p className="flex items-center gap-2 text-sm text-gray-700">
-                            <FiPhone className="shrink-0 text-teal-600" size={14} />
+                        <p className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300">
+                            <FiPhone className="shrink-0 text-teal-600 dark:text-teal-400" size={14} />
                             {office.phone}
                         </p>
                         <a
                             href={`mailto:${office.email}`}
-                            className="flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800"
+                            className="flex items-center gap-2 text-sm font-medium text-teal-700 dark:text-teal-400 hover:underline"
                         >
                             <FiMail className="shrink-0" size={14} />
                             {office.email}

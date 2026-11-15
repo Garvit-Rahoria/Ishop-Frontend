@@ -1,119 +1,78 @@
-"use client"
-import { useSearchParams, useRouter } from 'next/navigation';
+'use client'
+import { useSearchParams, useRouter } from 'next/navigation'
 import React from 'react'
 
-export default function BrandFilter({ brands }) {
-
+export default function BrandFilter({ brands = [] }) {
     const router = useRouter()
-    const searchParams = useSearchParams();
-    const select_brand = searchParams.get("brand_slug")
-    // console.log(select_brand)
+    const searchParams = useSearchParams()
+    const select_brand = searchParams.get('brand_slug')
 
     function filterHandler(slug) {
-        const query = new URLSearchParams(searchParams.toString());
-        if (slug == select_brand) {
-            query.delete("brand_slug")
+        const query = new URLSearchParams(searchParams.toString())
+        if (slug === select_brand) {
+            query.delete('brand_slug')
         } else {
-            query.set("brand_slug", slug)
+            query.set('brand_slug', slug)
         }
+        query.delete('page')
         router.push(`?${query.toString()}`, { scroll: false })
         router.refresh()
     }
 
     function clearBrandFunction() {
-        const query = new URLSearchParams(searchParams.toString());
-        query.delete("brand_slug")
+        const query = new URLSearchParams(searchParams.toString())
+        query.delete('brand_slug')
+        query.delete('page')
         router.push(`?${query.toString()}`, { scroll: false })
-        router.refresh();
+        router.refresh()
     }
 
     return (
-        
-    //     <div>
-    //         <h4 className="font-medium text-black mb-3">BY BRAND~</h4>
+        <div>
+            <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-800 dark:text-slate-200 text-xs uppercase tracking-wider">
+                    Brand
+                </h4>
+                {select_brand ? (
+                    <button
+                        type="button"
+                        onClick={clearBrandFunction}
+                        className="text-[11px] font-semibold text-rose-500 hover:text-rose-600 cursor-pointer"
+                    >
+                        Reset
+                    </button>
+                ) : null}
+            </div>
 
-    //         <button
-    //             onClick={clearBrandFunction}
-    //             disabled={!select_brand}
-    //             className={`w-full border rounded-md py-2 mb-2 font-medium transition
-    //                     ${select_brand
-    //                     ? "cursor-pointer hover:bg-red-500 hover:text-white"
-    //                     : "cursor-not-allowed opacity-50"}
-    // `}
-    //         >
-    //             Clear Brands
-    //         </button>
+            <div className="flex flex-wrap gap-1.5">
+                {brands.map((brand) => {
+                    const isActive = select_brand === brand.slug
 
-    //         <div className="flex flex-col  text-gray-600">
-
-    //             {brands.map((brand) => {
-    //                 const isActive = select_brand === brand.slug;
-
-    //                 return (
-    //                     <div
-    //                         key={brand._id}
-    //                         onClick={() => filterHandler(brand.slug)}
-    //                         className={`
-    //                                 flex justify-between items-center
-    //                                 ml-3 px-2 py-1 rounded-md cursor-pointer
-    //                                 transition-all duration-200
-    //                                 ${isActive
-    //                                 ? "bg-teal-500 text-white"
-    //                                 : "hover:bg-teal-100 hover:text-black"}
-    //                                  `}
-    //                     >
-    //                         <p className="text-sm">{brand.name}</p>
-    //                         <p className="text-xs">{brand.count || 0}</p>
-    //                     </div>
-    //                 );
-    //             })}
-
-    //         </div>
-    //     </div>
-    <div>
-    <h4 className="font-medium text-black mb-3">BY BRAND~</h4>
-
-    <button
-        onClick={clearBrandFunction}
-        disabled={!select_brand}
-        className={`w-full border rounded-md py-2 mb-4 font-medium transition
-        ${select_brand
-                ? "cursor-pointer hover:bg-red-500 hover:text-white"
-                : "cursor-not-allowed opacity-50"}
-        `}
-    >
-        Clear Brands
-    </button>
-
-    <div className="flex flex-wrap gap-3 text-gray-600">
-
-        {brands.map((brand) => {
-            const isActive = select_brand === brand.slug;
-
-            return (
-                <div
-                    key={brand._id}
-                    onClick={() => filterHandler(brand.slug)}
-                    className={`
-                        flex items-center gap-2
-                        px-2 py-1 rounded-2xl cursor-pointer
-                        transition-all duration-200 border
-                        ${isActive
-                            ? "bg-teal-500 text-white"
-                            : "hover:bg-teal-100 hover:text-black"}
-                    `}
-                >
-                    <p className="text-xs">{brand.name}</p>
-
-                    {brand.count ? (
-                        <p className="text-xs">({brand.count})</p>
-                    ) : null}
-                </div>
-            );
-        })}
-
-    </div>
-</div>
-
+                    return (
+                        <button
+                            type="button"
+                            key={brand._id}
+                            onClick={() => filterHandler(brand.slug)}
+                            className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
+                                isActive
+                                    ? 'bg-teal-500 text-white border-teal-500 shadow-sm'
+                                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-200 dark:border-slate-700 hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-300'
+                            }`}
+                        >
+                            <span>{brand.name}</span>
+                            {brand.count ? (
+                                <span
+                                    className={`text-[10px] px-1 rounded ${
+                                        isActive ? 'bg-white/20' : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300'
+                                    }`}
+                                >
+                                    {brand.count}
+                                </span>
+                            ) : null}
+                        </button>
+                    )
+                })}
+            </div>
+        </div>
     )
 }

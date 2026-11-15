@@ -8,10 +8,10 @@ export default async function RecentlyViewedRow() {
     const products = (productData?.data || []).slice(0, 4)
 
     return (
-        <div className="bg-white rounded-xl p-6 border border-gray-100">
-            <div className="flex justify-between items-center mb-4">
-                <h4 className="text-sm font-semibold uppercase">Featured products</h4>
-                <Link href="/products" className="text-sm text-gray-500 hover:text-teal-500">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors">
+            <div className="flex justify-between items-center mb-5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">Featured products</h4>
+                <Link href="/products" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition">
                     View All
                 </Link>
             </div>
@@ -21,8 +21,7 @@ export default async function RecentlyViewedRow() {
                     <p className="col-span-full text-sm text-gray-400">No products yet</p>
                 ) : (
                     products.map((product) => (
-                        <BestSellerCard
-                            key={product._id}
+                        <BestSellerCard key={product._id} product={product}
                             href={product.slug ? `/product/${product.slug}` : undefined}
                             image={resolveMediaUrl(
                                 productData?.meta?.imageBaseUrl,

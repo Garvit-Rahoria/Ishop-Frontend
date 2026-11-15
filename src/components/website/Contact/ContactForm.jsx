@@ -16,8 +16,8 @@ const INITIAL = {
 }
 
 const fieldClass =
-    'w-full rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20'
-const labelClass = 'block text-sm font-semibold text-gray-700 mb-1.5'
+    'w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50/80 dark:bg-slate-800 px-4 py-3 text-sm text-gray-900 dark:text-slate-100 outline-none transition placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-teal-500 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-teal-500/20'
+const labelClass = 'block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1.5'
 
 const ContactForm = () => {
     const [form, setForm] = useState(INITIAL)
@@ -64,19 +64,19 @@ const ContactForm = () => {
 
     if (sent) {
         return (
-            <div className="rounded-2xl bg-teal-50 border border-teal-100 px-6 py-12 text-center">
-                <div className="mx-auto w-14 h-14 rounded-full bg-teal-500 text-white flex items-center justify-center mb-4">
+            <div className="rounded-2xl bg-teal-50 dark:bg-teal-950/40 border border-teal-100 dark:border-teal-800/60 px-6 py-12 text-center transition-colors">
+                <div className="mx-auto w-14 h-14 rounded-full bg-teal-500 text-white flex items-center justify-center mb-4 shadow-sm shadow-teal-500/30">
                     <FiCheckCircle size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Message sent</h3>
-                <p className="text-sm text-gray-600 mt-2 max-w-sm mx-auto">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100">Message sent</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400 mt-2 max-w-sm mx-auto">
                     Thanks for reaching out. A confirmation email is on its way —
                     we&apos;ll reply to your inbox soon.
                 </p>
                 <button
                     type="button"
                     onClick={() => setSent(false)}
-                    className="mt-6 text-sm font-semibold text-teal-700 hover:text-teal-800 underline-offset-2 hover:underline"
+                    className="mt-6 text-sm font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 underline-offset-2 hover:underline cursor-pointer"
                 >
                     Send another message
                 </button>
@@ -213,7 +213,7 @@ const ContactForm = () => {
 
             <label
                 htmlFor="newsletter"
-                className="flex items-start gap-3 text-sm text-gray-600 cursor-pointer rounded-xl border border-gray-100 bg-gray-50/60 px-4 py-3"
+                className="flex items-start gap-3 text-sm text-gray-600 dark:text-slate-300 cursor-pointer rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/60 px-4 py-3 transition-colors"
             >
                 <input
                     id="newsletter"

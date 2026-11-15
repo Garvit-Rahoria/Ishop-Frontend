@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { Loader2 } from 'lucide-react'
 import Header from '@/components/admin/Header'
 import Sidebar from '@/components/admin/Sidebar'
 import { client, notify } from '@/utils/helper'
@@ -99,7 +100,7 @@ export default function AdminShell({ children }) {
             const msg =
                 err?.response?.data?.message ||
                 (err?.code === 'ERR_NETWORK' || !err?.response
-                    ? 'Server offline — start API: cd server && node --watch server.js'
+                    ? 'Backend Server offline hai — Ishop-Backend start karein: cd Ishop-Backend && npm start'
                     : err?.message || 'Login failed')
             setError(msg)
             notify(msg, false)
@@ -111,8 +112,15 @@ export default function AdminShell({ children }) {
 
     if (status === 'loading') {
         return (
-            <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 text-gray-500">
-                Loading...
+            <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-900 text-white select-none">
+                <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-teal-600 via-teal-500 to-emerald-400 text-white font-black text-2xl shadow-xl shadow-teal-500/25 mb-4 animate-pulse">
+                    S
+                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 ring-2 ring-slate-900" />
+                </div>
+                <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-300">
+                    <Loader2 size={16} className="animate-spin text-teal-400" />
+                    <span>Loading Admin Workspace...</span>
+                </div>
             </div>
         )
     }
@@ -182,9 +190,16 @@ export default function AdminShell({ children }) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 rounded-xl transition disabled:opacity-60"
+                            className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold py-3.5 rounded-xl transition duration-150 shadow-md shadow-teal-500/25 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
                         >
-                            {loading ? 'Signing in...' : 'Login as Admin'}
+                            {loading ? (
+                                <>
+                                    <Loader2 size={18} className="animate-spin text-white" />
+                                    <span>Signing in...</span>
+                                </>
+                            ) : (
+                                <span>Login as Admin</span>
+                            )}
                         </button>
                     </form>
 
@@ -197,7 +212,7 @@ export default function AdminShell({ children }) {
     }
 
     return (
-        <div className="flex min-h-screen w-full bg-gray-50 overflow-x-hidden">
+        <div className="flex min-h-screen w-full bg-slate-50/60 overflow-x-hidden">
             <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
             <div className="flex-1 flex flex-col min-w-0">
                 <Header

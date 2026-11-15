@@ -1,257 +1,224 @@
-"use client"
+"use client";
 
-import { use, useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from "react";
 import { client, notify } from "@/utils/helper";
 import { useRouter } from "next/navigation";
-import { FiUploadCloud } from "react-icons/fi";
-import { getBrandById, getCategories } from '@/api/api-call';
-import Select from 'react-select'
+import Link from "next/link";
+import { ArrowLeft, UploadCloud, Loader2 } from "lucide-react";
+import { getBrandById } from "@/api/api-call";
+import { resolveMediaUrl } from "@/utils/media";
 
 export default function EditBrand({ params }) {
+  const { id } = use(params);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
+  const [brand, setBrand] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
 
+  const nameRef = useRef();
+  const slugRef = useRef();
+  const fileRef = useRef();
 
-    const [image, setImage] = useState("")
-    const { id } = use(params)
-    const router = useRouter()
-    const [loading, setLoading] = useState(false)
-    const [fetchLoading, setFetchLoading] = useState(false)
-    const [brand, setBrand] = useState({})
-    const [category, setCategory] = useState([])
-    const [selCategory, setSelCategory] = useState([])
+  function createSlug() {
+    const brandName = nameRef.current.value;
+    const slug = brandName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
 
-    const nameRef = useRef();
-    const slugRef = useRef();
-    const fileRef = useRef();
+    slugRef.current.value = slug;
+  }
 
-    function categorySelect(cat) {
-        setSelCategory(cat ? cat.value : null);
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  useEffect(() => {
+    async function loadData() {
+      setFetchLoading(true);
+      try {
+        const brandRes = await getBrandById(id);
+        const bData = brandRes?.data || {};
+        setBrand(bData);
+        setImagePreview(resolveMediaUrl(brandRes?.meta?.imageBaseUrl, bData?.image) || "");
+      } catch (err) {
+        console.error(err);
+        notify("Failed to load brand data", false);
+      } finally {
+        setFetchLoading(false);
+      }
     }
 
-    function createSlug() {
-        let catSlug = nameRef.current.value;
+    if (id) loadData();
+  }, [id]);
 
-        let slug = catSlug
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-");
+  const submitHandler = (event) => {
+    event.preventDefault();
 
-        slugRef.current.value = slug;
+    const formData = new FormData();
+    formData.append("name", nameRef.current.value);
+    formData.append("slug", slugRef.current.value);
+
+    const file = fileRef.current?.files?.[0];
+    if (file) {
+      formData.append("image", file);
     }
 
-    const submitHandler = (event) => {
-        event.preventDefault();
+    setLoading(true);
 
-        const formData = new FormData();
-        formData.append("name", nameRef.current.value);
-        formData.append("slug", slugRef.current.value);
-
-        if (selCategory) {
-            formData.append("categoryId", selCategory);
+    client
+      .put(`/brand/update/${id}`, formData)
+      .then((response) => {
+        notify(response.data.message, response.data.success);
+        if (response.data.success) {
+          router.push("/admin/brand");
         }
+      })
+      .catch((error) => {
+        const message =
+          error?.response?.data?.message || "Failed to update brand";
+        notify(message, false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
-        if (fileRef.current.files[0]) {
-            formData.append("image", fileRef.current.files[0]);
-        }
-
-        setLoading(true)
-
-        client.put(`/brand/update/${id}`, formData).then(
-            (response) => {
-                notify(response.data.message, response.data.success)
-
-                if (response.data.success) {
-                    nameRef.current.value = ""
-                    slugRef.current.value = ""
-                    fileRef.current.value = ""
-                    router.push("/admin/brand")
-                }
-            }
-        ).catch(
-            (error) => {
-                const message =
-                    error?.response?.data?.message || "Internal Server Error"
-                notify(message, false)
-            }
-        ).finally(() => {
-            setLoading(false)
-        })
-    }
-
-    const fetchCategory = async () => {
-        try {
-            const res = await getCategories()
-            setCategory(res.data)
-            console.log(res.data)
-        } catch (error) {
-            console.log(error)
-            setCategory([])
-        }
-    }
-
-    useEffect(() => {
-        fetchCategory()
-    }, [])
-
-    async function getBrand() {
-        setFetchLoading(true)
-        try {
-
-            const { data, meta } = await getBrandById(id)
-
-            setBrand(data)
-            setImage(
-                data.image?.startsWith("http")
-                    ? data.image
-                    : `${meta?.imageBaseUrl || ""}/${data.image || ""}`.replace(/([^:]\/)\/+/g, "$1")
-            )
-
-            if (data.categoryId) {
-                setSelCategory(
-                    Array.isArray(data.categoryId) ? data.categoryId[0] : data.categoryId
-                )
-            }
-
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setFetchLoading(false)
-        }
-    }
-
-    useEffect(
-        () => {
-            getBrand()
-        },
-        [id]
-    )
-    if (fetchLoading) {
-        return (
-            <h2 className='h-screen flex justify-center items-center'>Loading...</h2>
-        )
-    }
-
-
-    // console.log(brand)
+  if (fetchLoading) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
+      <div className="py-32 flex flex-col items-center justify-center text-slate-400">
+        <Loader2 size={32} className="animate-spin text-teal-600 mb-2" />
+        <p className="text-sm font-semibold">Loading brand details...</p>
+      </div>
+    );
+  }
 
-            <div className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-2xl rounded-3xl p-8 border border-gray-200">
+  return (
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+      {/* Back button */}
+      <div>
+        <Link
+          href="/admin/brand"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition mb-3"
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Brands</span>
+        </Link>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Edit Brand
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Modify brand name, slug, linked category, or replacement logo.
+        </p>
+      </div>
 
-                <div className="mb-6 text-center">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        Edit Brand
-                    </h2>
-                </div>
+      {/* Form Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 md:p-8 shadow-2xs">
+        <form className="space-y-6" onSubmit={submitHandler}>
+          {/* Name */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Brand Name <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              ref={nameRef}
+              defaultValue={brand?.name}
+              onChange={createSlug}
+              required
+              className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
+            />
+          </div>
 
-                <form className="space-y-5" onSubmit={submitHandler}>
-
-                    {/* Name */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">
-                            Brand Name
-                        </label>
-                        <input
-                            type="text"
-                            ref={nameRef}
-                            defaultValue={brand?.name}
-                            onChange={createSlug}
-                            placeholder="e.g. Men Clothing"
-                            className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300 focus:ring-2 focus:ring-black"
-                        />
-                    </div>
-
-                    {/* Slug */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">
-                            Slug
-                        </label>
-                        <input
-                            type="text"
-                            ref={slugRef}
-                            defaultValue={brand?.slug}
-                            readOnly
-                            placeholder="e.g. men-clothing"
-                            className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">
-                            Category
-                        </label>
-
-                        {/* <Select
-                            className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
-                            onChange={categorySelect}
-                            options={category.map((cat) => (
-                                { value: cat._id, label: cat.name }
-                            ))} /> */}
-
-                        <Select
-                            name='category'
-                            className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
-                            onChange={categorySelect}
-                            value={
-                                category
-                                    .map(cat => ({ value: cat._id, label: cat.name }))
-                                    .find(opt => opt.value === selCategory) || null
-                            }  // ✅ Pre-selected value
-                            options={category.map((cat) => ({ value: cat._id, label: cat.name }))}
-                        />
-
-                    </div>
-
-                    {/* IMAGE UPLOAD UI */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700">
-                            Brand Image
-                        </label>
-
-                        <div className='flex items-center justify-center'>
-                            {image && (
-                                <img
-                                    src={image}
-                                    alt="brand"
-                                    className="w-20 h-10 object-cover rounded-lg mt-3"
-                                />
-                            )}
-                        </div>
-
-                        <div
-                            onClick={() => fileRef.current.click()}
-                            className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 transition"
-                        >
-                            <FiUploadCloud className="mx-auto text-3xl text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-500">
-                                Click to upload or drag & drop
-                            </p>
-                        </div>
-
-                        <input
-                            type="file"
-                            ref={fileRef}
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) setImage(URL.createObjectURL(file));
-                            }}
-                        />
-                    </div>
-
-                    {/* Button */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium hover:shadow-lg"
-                    >
-                        {loading ? "waiting..." : "Edit"}
-                    </button>
-
-                </form>
-
+          {/* Slug */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              URL Slug
+            </label>
+            <div className="flex items-center">
+              <span className="px-3 py-2.5 text-xs font-mono text-slate-400 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl">
+                /brand/
+              </span>
+              <input
+                type="text"
+                ref={slugRef}
+                defaultValue={brand?.slug}
+                readOnly
+                className="w-full px-4 py-2.5 text-xs font-mono bg-slate-100 border border-slate-200 rounded-r-xl text-slate-600"
+              />
             </div>
-        </div>
-    )
+          </div>
+
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Brand Logo
+            </label>
+
+            <div
+              onClick={() => fileRef.current?.click()}
+              className="border-2 border-dashed border-slate-200 hover:border-teal-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50 hover:bg-teal-50/20"
+            >
+              {imagePreview ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-28 h-16 object-contain rounded-xl border border-slate-200 bg-white p-2 mb-2 shadow-2xs"
+                  />
+                  <p className="text-xs font-semibold text-teal-600">
+                    Click to replace current logo
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <UploadCloud size={32} className="text-slate-400 mb-2" />
+                  <p className="text-sm font-semibold text-slate-700">
+                    Click or drag logo to upload
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    SVG, PNG, or JPG recommended with transparent background
+                  </p>
+                </div>
+              )}
+
+              <input
+                type="file"
+                ref={fileRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <Link href="/admin/brand">
+              <button
+                type="button"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition"
+              >
+                Cancel
+              </button>
+            </Link>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-sm shadow-teal-600/25 transition disabled:opacity-60 cursor-pointer"
+            >
+              {loading && <Loader2 size={14} className="animate-spin" />}
+              <span>{loading ? "Saving Changes..." : "Update Brand"}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

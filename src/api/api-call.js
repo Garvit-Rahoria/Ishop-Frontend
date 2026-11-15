@@ -238,6 +238,33 @@ const getDashboard = async () => {
     }
 }
 
+const getAdminUsers = async (query = {}) => {
+    try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get("jwt")?.value ?? null;
+
+        const filter = new URLSearchParams();
+        if (query.q) filter.append("q", query.q);
+        if (query.role) filter.append("role", query.role);
+        if (query.status) filter.append("status", query.status);
+        if (query.isVerified) filter.append("isVerified", query.isVerified);
+
+        const response = await client.get(`/user/all?${filter.toString()}`, {
+            headers: token ? {
+                Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}`,
+            } : {},
+        });
+
+        if (!response.data.success) {
+            throw new Error(response.data.message || "Failed to fetch users");
+        }
+        return response.data;
+    } catch (error) {
+        console.warn("getAdminUsers failed:", error?.response?.data || error.message);
+        return { success: false, data: [], meta: {} };
+    }
+}
+
 
 export {
     getCategories,
@@ -252,4 +279,5 @@ export {
     getMe,
     getOrders,
     getDashboard,
+    getAdminUsers,
 }

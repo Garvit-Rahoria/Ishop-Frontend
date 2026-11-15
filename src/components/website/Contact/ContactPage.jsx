@@ -51,15 +51,15 @@ const ContactPage = () => {
             </section>
 
             {/* Form + info */}
-            <section className="bg-[#f3f4f6] py-10 md:py-14">
+            <section className="bg-[#f3f4f6] dark:bg-[#0b1120] py-10 md:py-14 transition-colors duration-200">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         <div className="lg:col-span-7">
-                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8">
-                                <h2 className="text-xl font-bold text-gray-900">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-6 md:p-8 transition-colors">
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">
                                     Send us a message
                                 </h2>
-                                <p className="text-sm text-gray-500 mt-1 mb-6">
+                                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 mb-6">
                                     Fill the form below — we&apos;ll get back to your email.
                                 </p>
                                 <ContactForm />

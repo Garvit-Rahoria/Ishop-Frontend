@@ -42,25 +42,27 @@ export default async function SidePromoCards() {
                     <Link
                         key={product._id}
                         href={product.slug ? `/product/${product.slug}` : '/products'}
-                        className="group relative overflow-hidden rounded-xl bg-gray-100 aspect-video block shadow-sm"
+                        className="group relative overflow-hidden rounded-xl bg-slate-900 aspect-video block shadow-sm border border-slate-800"
                     >
                         <img
                             src={imageUrl}
                             alt={product.name}
-                            className="absolute inset-0 w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                            className="absolute inset-0 w-full h-full object-contain p-2 transition duration-300 group-hover:scale-105"
                         />
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
 
                         <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
                             <p className="text-xs font-medium opacity-90 line-clamp-1">
                                 {product.name}
                             </p>
                             <div className="flex items-center justify-between mt-1 gap-2">
-                                <span className="text-sm font-bold">₹{product.final_price}</span>
+                                <span className="text-sm font-bold text-teal-300">
+                                    ₹{Number(product.final_price || 0).toLocaleString('en-IN')}
+                                </span>
                                 {save > 0 ? (
-                                    <span className="text-[10px] bg-teal-500 px-2 py-0.5 rounded-full font-semibold">
-                                        SAVE ₹{save}
+                                    <span className="text-[10px] bg-teal-500 text-white px-2 py-0.5 rounded-full font-semibold shadow">
+                                        SAVE ₹{save.toLocaleString('en-IN')}
                                     </span>
                                 ) : null}
                             </div>

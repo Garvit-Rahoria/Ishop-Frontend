@@ -30,7 +30,7 @@ export default async function PreOrderBanner() {
                     <p className="text-sm font-semibold uppercase tracking-wide">Pre Order</p>
                     <p className="text-xs opacity-90 mt-1">Be the first to own</p>
                     <p className="text-sm font-medium mt-2">
-                        From ₹{featured?.final_price ?? 399}
+                        From ₹{Number(featured?.final_price ?? 399).toLocaleString('en-IN')}
                     </p>
                 </div>
 

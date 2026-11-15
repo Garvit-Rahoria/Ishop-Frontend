@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { useRef, useState } from "react"
+import { useRef, useState } from "react";
 import { client, notify } from "@/utils/helper";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Palette, Loader2 } from "lucide-react";
 
 export default function AddColor() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [colorCode, setColorCode] = useState("#000000");
 
   const nameRef = useRef();
   const slugRef = useRef();
-  // const fileRef = useRef();
 
   function createSlug() {
-    let catSlug = nameRef.current.value;
-
-    let slug = catSlug
+    const colorName = nameRef.current.value;
+    const slug = colorName
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9\s-]/g, "")
@@ -27,109 +28,129 @@ export default function AddColor() {
   const submitHandler = (event) => {
     event.preventDefault();
 
-    const formData = {
-      name: nameRef.current.value,
-      slug: slugRef.current.value,
-      color_code: event.target.color_code.value
-    }
+    setLoading(true);
 
-    setLoading(true)
-
-    client.post("/color/create", formData).then(
-      (response) => {
-        notify(response.data.message, response.data.success)
-
+    client
+      .post("/color/create", {
+        name: nameRef.current.value,
+        color_code: colorCode,
+        slug: slugRef.current.value,
+      })
+      .then((response) => {
+        notify(response.data.message, response.data.success);
         if (response.data.success) {
-          nameRef.current.value = ""
-          slugRef.current.value = ""
-          // fileRef.current.value = ""
-          router.push("/admin/color")
+          router.push("/admin/color");
         }
-      }
-    ).catch(
-      (error) => {
+      })
+      .catch((error) => {
         const message =
-          error?.response?.data?.message || "Internal Server Error"
-        notify(message, false)
-      }
-    ).finally(() => {
-      setLoading(false)
-    })
-  }
+          error?.response?.data?.message || "Failed to create color";
+        notify(message, false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
+    <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6">
+      {/* Back button */}
+      <div>
+        <Link
+          href="/admin/color"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition mb-3"
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Colors</span>
+        </Link>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Create New Color
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Define a product color variant with a visual swatch and HEX value.
+        </p>
+      </div>
 
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-2xl rounded-3xl p-8 border border-gray-200">
-
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Add New Color
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Create a new color for your store
-          </p>
-        </div>
-
-        <form className="space-y-5" onSubmit={submitHandler}>
-
+      {/* Form Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 md:p-8 shadow-2xs">
+        <form className="space-y-6" onSubmit={submitHandler}>
           {/* Name */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-               Name
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Color Name <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               ref={nameRef}
               onChange={createSlug}
-              placeholder="Color Name"
-              className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300 focus:ring-2 focus:ring-black"
+              required
+              placeholder="e.g. Midnight Blue"
+              className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
             />
+          </div>
+
+          {/* Color Swatch & Picker */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Color Code (HEX) <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={colorCode}
+                onChange={(e) => setColorCode(e.target.value)}
+                className="w-12 h-12 rounded-xl border border-slate-300 cursor-pointer p-1 bg-white"
+              />
+              <input
+                type="text"
+                value={colorCode}
+                onChange={(e) => setColorCode(e.target.value)}
+                placeholder="#000000"
+                className="flex-1 px-4 py-2.5 text-sm font-mono bg-slate-50 border border-slate-200 rounded-xl uppercase focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
+              />
+              <span
+                style={{ backgroundColor: colorCode }}
+                className="w-10 h-10 rounded-full border border-slate-300 shadow-inner"
+              />
+            </div>
           </div>
 
           {/* Slug */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Slug
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              URL Slug <span className="text-slate-400 font-normal">(Auto-generated)</span>
             </label>
             <input
               type="text"
               ref={slugRef}
               readOnly
-              placeholder="Color Slug"
-              className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
+              placeholder="midnight-blue"
+              className="w-full px-4 py-2.5 text-xs font-mono bg-slate-100 border border-slate-200 rounded-xl text-slate-600"
             />
           </div>
 
-          {/* IMAGE UPLOAD UI */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              HexCode
-            </label>
+          {/* Submit */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <Link href="/admin/color">
+              <button
+                type="button"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition"
+              >
+                Cancel
+              </button>
+            </Link>
 
-            <div
-              className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-teal-500 transition"
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-sm shadow-teal-600/25 transition disabled:opacity-60 cursor-pointer"
             >
-              <input
-              type="color"
-              name="color_code"
-              className="w-full cursor-pointer"
-            />
-            </div>
+              {loading && <Loader2 size={14} className="animate-spin" />}
+              <span>{loading ? "Creating..." : "Save Color"}</span>
+            </button>
           </div>
-
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium hover:shadow-lg"
-          >
-            {loading ? "waiting..." : "Save"}
-          </button>
-
         </form>
-
       </div>
     </div>
-  )
+  );
 }

@@ -1,33 +1,23 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react";
 import { client, notify } from "@/utils/helper";
 import { useRouter } from "next/navigation";
-import { FiUploadCloud } from "react-icons/fi";
-import { getCategories } from "@/api/api-call";
-import Select from 'react-select'
-
+import Link from "next/link";
+import { ArrowLeft, UploadCloud, Loader2 } from "lucide-react";
 
 export default function AddBrand() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [category, setCategory] = useState([])
-  const [selCategory, setSelCategory] = useState([])
-  const [image, setImage] = useState("")
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState("");
 
   const nameRef = useRef();
   const slugRef = useRef();
   const fileRef = useRef();
 
-  function categorySelect(cat) {
-    setSelCategory(cat ? cat.value : null);
-  }
-
-
   function createSlug() {
-    let catSlug = nameRef.current.value;
-
-    let slug = catSlug
+    const brandName = nameRef.current.value;
+    const slug = brandName
       .toLowerCase()
       .trim()
       .replace(/[^a-z0-9\s-]/g, "")
@@ -36,169 +26,168 @@ export default function AddBrand() {
     slugRef.current.value = slug;
   }
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const submitHandler = (event) => {
     event.preventDefault();
+
+    const file = fileRef.current?.files?.[0];
+    if (!file) {
+      notify("Please select a brand logo image", false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("name", nameRef.current.value);
     formData.append("slug", slugRef.current.value);
-    formData.append("image", event.target.image.files[0])
-    formData.append("categoryId", JSON.stringify(selCategory))
+    formData.append("image", file);
 
-    setLoading(true)
+    setLoading(true);
 
-    client.post("/brand/create", formData).then(
-      (response) => {
-        notify(response.data.message, response.data.success)
-
+    client
+      .post("/brand/create", formData)
+      .then((response) => {
+        notify(response.data.message, response.data.success);
         if (response.data.success) {
-          nameRef.current.value = ""
-          slugRef.current.value = ""
-          fileRef.current.value = ""
-          router.push("/admin/brand")
+          router.push("/admin/brand");
         }
-      }
-    ).catch(
-      (error) => {
+      })
+      .catch((error) => {
         const message =
-          error?.response?.data?.message || "Internal Server Error"
-        notify(message, false)
-      }
-    ).finally(() => {
-      setLoading(false)
-    })
-  }
-
-  const fetchCategory = async () => {
-    try {
-      const res = await getCategories()
-      setCategory(res.data)
-      console.log(res.data)
-    } catch (error) {
-      console.log(error)
-      setCategory([])
-    }
-  }
-
-  useEffect(() => {
-    fetchCategory()
-  }, [])
+          error?.response?.data?.message || "Failed to create brand";
+        notify(message, false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+      {/* Back button */}
+      <div>
+        <Link
+          href="/admin/brand"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition mb-3"
+        >
+          <ArrowLeft size={14} />
+          <span>Back to Brands</span>
+        </Link>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Create New Brand
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Add an electronics or manufacturer brand to link with catalog items.
+        </p>
+      </div>
 
-      <div className="w-full max-w-md bg-white/80 backdrop-blur-md shadow-2xl rounded-3xl p-8 border border-gray-200">
-
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Add New Brand
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Create a new brand for your store
-          </p>
-        </div>
-
-        <form className="space-y-5" onSubmit={submitHandler}>
-
+      {/* Form Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 md:p-8 shadow-2xs">
+        <form className="space-y-6" onSubmit={submitHandler}>
           {/* Name */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Name
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Brand Name <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               ref={nameRef}
               onChange={createSlug}
-              placeholder="e.g. Men Clothing"
-              className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300 focus:ring-2 focus:ring-black"
+              required
+              placeholder="e.g. Samsung, Apple, Sony"
+              className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition"
             />
           </div>
 
           {/* Slug */}
           <div>
-            <label className="text-sm font-medium text-gray-700">
-              Slug
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              URL Slug <span className="text-slate-400 font-normal">(Auto-generated)</span>
             </label>
-            <input
-              type="text"
-              ref={slugRef}
-              readOnly
-              placeholder="e.g. men-clothing"
-              className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
-            />
-          </div>
-
-
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Category
-            </label>
-            <Select
-              name='category'
-              className="w-full px-4 py-2.5 mt-1 rounded-xl border border-gray-300"
-              onChange={categorySelect}
-              value={
-                category
-                  .map(cat => ({ value: cat._id, label: cat.name }))
-                  .find(opt => opt.value === selCategory) || null
-              }  // ✅ Pre-selected value
-              options={category.map((cat) => ({ value: cat._id, label: cat.name }))}
-            />
-
-          </div>
-
-          {/* IMAGE UPLOAD UI */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Brand Image
-            </label>
-
-            <div className='flex items-center justify-center'>
-              {image && (
-                <img
-                  src={image}
-                  alt="brand"
-                  className="w-20 h-10 object-cover rounded-lg mt-3"
-                />
-              )}
+            <div className="flex items-center">
+              <span className="px-3 py-2.5 text-xs font-mono text-slate-400 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl">
+                /brand/
+              </span>
+              <input
+                type="text"
+                ref={slugRef}
+                readOnly
+                placeholder="samsung"
+                className="w-full px-4 py-2.5 text-xs font-mono bg-slate-100 border border-slate-200 rounded-r-xl text-slate-600"
+              />
             </div>
+          </div>
+
+          {/* Logo Upload */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+              Brand Logo <span className="text-rose-500">*</span>
+            </label>
 
             <div
-              onClick={() => fileRef.current.click()}
-              className="mt-2 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-500 transition"
+              onClick={() => fileRef.current?.click()}
+              className="border-2 border-dashed border-slate-200 hover:border-teal-500 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50 hover:bg-teal-50/20"
             >
-              <FiUploadCloud className="mx-auto text-3xl text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">
-                Click to upload or drag & drop
-              </p>
+              {imagePreview ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-28 h-16 object-contain rounded-xl border border-slate-200 bg-white p-2 mb-2 shadow-2xs"
+                  />
+                  <p className="text-xs font-semibold text-teal-600">
+                    Click to change selected logo
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center">
+                  <UploadCloud size={32} className="text-slate-400 mb-2" />
+                  <p className="text-sm font-semibold text-slate-700">
+                    Click or drag logo to upload
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    SVG, PNG, or JPG recommended with transparent background
+                  </p>
+                </div>
+              )}
+
+              <input
+                type="file"
+                ref={fileRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
-            <input
-              type="file"
-              ref={fileRef}
-              name="image"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) setImage(URL.createObjectURL(file));
-              }}
-            />
-
-
           </div>
 
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-teal-600 text-white font-medium hover:shadow-lg"
-          >
-            {loading ? "waiting..." : "Save"}
-          </button>
+          {/* Submit */}
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <Link href="/admin/brand">
+              <button
+                type="button"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition"
+              >
+                Cancel
+              </button>
+            </Link>
 
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs px-6 py-2.5 rounded-xl shadow-sm shadow-teal-600/25 transition disabled:opacity-60 cursor-pointer"
+            >
+              {loading && <Loader2 size={14} className="animate-spin" />}
+              <span>{loading ? "Creating..." : "Save Brand"}</span>
+            </button>
+          </div>
         </form>
-
       </div>
     </div>
-  )
+  );
 }

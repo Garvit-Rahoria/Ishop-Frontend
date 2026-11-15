@@ -3,7 +3,7 @@ import React from 'react'
 export default function MainBanner() {
     return (
         <div>
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 transition-colors">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* Left Large Banner */}
@@ -35,90 +35,34 @@ export default function MainBanner() {
                         />
 
                         {/* Slider Indicator */}
-                        <div className="absolute bottom-4 right-6 bg-white text-xs px-3 py-1 rounded-full shadow">
+                        <div className="absolute bottom-4 right-6 bg-slate-900/80 backdrop-blur-xs text-white text-xs font-bold px-3 py-1 rounded-full shadow border border-white/20">
                             3 / 3
                         </div>
                     </div>
 
                     {/* Right Small Banner */}
-                    {/* <div className="rounded-xl overflow-hidden bg-linear-to-b from-[#dcdff1] to-[#f3d7a6] p-6 flex flex-col justify-between">
-                        <div className="flex justify-between">
-                            <div>
-                                <h3 className="text-xl font-semibold leading-tight mb-2">
-                                    redmi note 12 <br /> Pro+ 5g
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                    Rise to the challenge
-                                </p>
-                            </div>
-                            <button className="bg-black max-w-50 max-h-10 text-white text-xs px-4 py-2 rounded-full hover:bg-gray-800 transition">
-                                SHOP NOW
-                            </button>
-                        </div>
-
-
-                        <div className=" flex justify-between items-end mt-4">
-                            <img
-                                src="https://www.gizmochina.com/wp-content/uploads/2026/04/Redmi-Note-17-500x500.png?x10805"
-                                alt="Phone"
-                                className=" w-full object-contain"
-                            />
-
-
-                        </div>
-
-                    </div> */}
-
-                    {/* <div className="relative rounded-xl overflow-hidden p-6 flex flex-col justify-between bg-linear-to-b from-[#dcdff1] to-[#f3d7a6]">
-
-                       
-                        <img
-                            src="https://www.gizmochina.com/wp-content/uploads/2026/04/Redmi-Note-17-500x500.png?x10805"
-                            alt="Phone"
-                            className="absolute inset-0 w-full border object-cover"
-                        />
-
-                       
-                        <div className="relative z-10 flex justify-between">
-                            <div>
-                                <h3 className="text-xl font-semibold leading-tight mb-2">
-                                    redmi note 12 <br /> Pro+ 5g
-                                </h3>
-                                <p className="text-sm text-gray-600">
-                                    Rise to the challenge
-                                </p>
-                            </div>
-
-                            <button className="bg-black text-white text-xs px-4 py-2 rounded-full hover:bg-gray-800 transition">
-                                SHOP NOW
-                            </button>
-                        </div>
-
-                    </div> */}
-
                     <div className="relative rounded-xl overflow-hidden p-6 flex flex-col justify-end h-[280px]">
 
                         {/* Background Image */}
                         <img
                             src="https://www.gizmochina.com/wp-content/uploads/2026/04/Redmi-Note-17-500x500.png?x10805"
                             alt="Phone"
-                            className="absolute inset-0 w-full object-cover"
+                            className="absolute inset-0 w-full h-full object-cover"
                         />
 
-                        <div className="absolute inset-0 bg-purple-600/20"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-purple-950/50 to-transparent"></div>
 
-                       
                         <div className="relative z-10 flex justify-between items-end">
                             <div>
-                                <h3 className="text-xl font-semibold leading-tight mb-1 text-black">
+                                <h3 className="text-xl font-bold leading-tight mb-1 text-white drop-shadow">
                                     Redmi Note 17 <br /> Pro+ 5G
                                 </h3>
-                                <p className="text-sm text-black">
+                                <p className="text-sm text-slate-200 drop-shadow-xs">
                                     Rise to the challenge
                                 </p>
                             </div>
 
-                            <button className="bg-black text-white text-xs px-4 py-2 rounded-full hover:bg-gray-800 transition">
+                            <button className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-4 py-2 rounded-full transition shadow-sm cursor-pointer">
                                 SHOP NOW
                             </button>
                         </div>

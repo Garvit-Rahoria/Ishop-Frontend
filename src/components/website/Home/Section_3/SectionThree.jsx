@@ -11,11 +11,16 @@ export default async function SectionThree() {
         <section className="max-w-7xl mx-auto px-4 py-10">
 
             <div className="flex justify-between items-center mb-6">
-                <div className="flex gap-6 text-sm font-medium">
-                    <span className="border-b-2 border-teal-500 pb-1">BEST SELLER</span>
+                <div className="flex gap-6 text-sm font-bold tracking-wider">
+                    <span className="border-b-2 border-teal-500 pb-1 text-slate-900 dark:text-slate-100 uppercase">
+                        BEST SELLER
+                    </span>
                 </div>
 
-                <Link href="/products" className="text-sm text-gray-500 hover:text-teal-500 cursor-pointer">
+                <Link
+                    href="/products"
+                    className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition cursor-pointer"
+                >
                     View All
                 </Link>
             </div>
@@ -25,8 +30,7 @@ export default async function SectionThree() {
                     <p className="col-span-full text-gray-500 text-sm">No products yet.</p>
                 ) : (
                     products.map((product) => (
-                        <BestSellerCard
-                            key={product._id}
+                        <BestSellerCard key={product._id} product={product}
                             href={product.slug ? `/product/${product.slug}` : undefined}
                             image={resolveMediaUrl(productData?.meta?.imageBaseUrl, product.thumbnail)}
                             title={product.name}

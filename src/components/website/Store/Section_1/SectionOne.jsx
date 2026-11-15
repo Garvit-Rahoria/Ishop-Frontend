@@ -3,7 +3,7 @@ import PathSection from "./PathSection";
 
 const SectionOne = () => {
     return (
-        <section className="bg-[#f2f3f7] py-6">
+        <section className="bg-[#f2f3f7] dark:bg-[#0b1120] py-6 transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4">
 
                 <PathSection />

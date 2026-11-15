@@ -3,7 +3,7 @@ import BestSellerRow from "./Products/BestSellerRow";
 
 const SectionThree = ({ params }) => {
     return (
-        <section className="bg-white py-10">
+        <section className="bg-white dark:bg-[#0b1120] py-10 transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4 grid grid-cols-12 gap-8">
                 <aside className="col-span-12 lg:col-span-3">
                     <Filters />

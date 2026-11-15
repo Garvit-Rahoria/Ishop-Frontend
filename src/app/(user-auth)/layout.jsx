@@ -18,10 +18,19 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en"
-    className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f3f4f6]`}
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f3f4f6] dark:bg-[#0b1120] text-slate-800 dark:text-slate-100 transition-colors duration-200`}
     >
-      <body className="h-full w-full ">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('ishop_theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(!s&&d)){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="h-full w-full bg-transparent">
         <AppToaster />
         {children}
       </body>

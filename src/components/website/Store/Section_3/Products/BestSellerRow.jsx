@@ -13,7 +13,7 @@ const BestSellerRow = async ({ params }) => {
     const category_slug = params?.category_slug || null;
     const q = params?.q || null;
     const page = Number(params?.page) || 1;
-    const limit = Number(params?.limit) || 24;
+    const limit = Number(params?.limit) || 9;
 
     const product_response = await getProducts({
         status: true,
@@ -42,14 +42,14 @@ const BestSellerRow = async ({ params }) => {
                 q={q}
             />
 
-            <h3 className="font-semibold">
-                {q ? `Search results for “${q}”` : "Products"}
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                {q ? `Search results for “${q}”` : "All Products"}
             </h3>
 
             {products.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 py-16 text-center">
-                    <p className="text-gray-700 font-medium mb-1">No products found</p>
-                    <p className="text-sm text-gray-500">
+                <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 py-16 text-center">
+                    <p className="text-slate-800 dark:text-slate-200 font-bold mb-1">No products found</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                         Try adjusting filters or search terms.
                     </p>
                 </div>

@@ -17,7 +17,7 @@ export default async function DualPromoBanners() {
                         {left?.name || 'Tech essentials'}
                     </h3>
                     <p className="text-xs opacity-90 mt-1">
-                        From ₹{left?.final_price ?? '999'}
+                        From ₹{Number(left?.final_price ?? 999).toLocaleString('en-IN')}
                     </p>
                     <Link
                         href="/products"
@@ -42,7 +42,7 @@ export default async function DualPromoBanners() {
                         {right?.name || 'Discover more'}
                     </h3>
                     <p className="text-xs text-white/70 mt-1">
-                        From ₹{right?.final_price ?? '1,499'}
+                        From ₹{Number(right?.final_price ?? 1499).toLocaleString('en-IN')}
                     </p>
                     <Link
                         href="/products"

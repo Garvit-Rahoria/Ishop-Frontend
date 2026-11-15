@@ -4,6 +4,7 @@ import BrandFilter from "./BrandFilter";
 import ColorFilter from "./ColorFilter";
 import PriceFilter from "./PriceFilter";
 import Link from "next/link";
+import { FiFilter, FiRotateCcw } from "react-icons/fi";
 
 const Filters = async () => {
     const [category_reponse, color_reponse, brand_reponse] = await Promise.all([
@@ -17,26 +18,30 @@ const Filters = async () => {
     const brands = brand_reponse?.data || [];
 
     return (
-        <>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold ml-2">Filters</h2>
+        <aside className="w-full">
+            <div className="flex justify-between items-center mb-3 px-1">
+                <div className="flex items-center gap-2">
+                    <FiFilter className="text-teal-600 dark:text-teal-400" size={16} />
+                    <h2 className="text-base font-bold text-gray-800 dark:text-slate-100">Filters</h2>
+                </div>
                 <Link
                     href="/products"
-                    className="mr-2 text-sm underline hover:text-red-500"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-rose-500 transition"
                 >
-                    Clear All
+                    <FiRotateCcw size={12} />
+                    <span>Clear All</span>
                 </Link>
             </div>
-            <div className="bg-[#f3f4f8] rounded-xl p-5 text-sm space-y-6">
+            <div className="bg-slate-50 dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl p-4 text-sm space-y-5 shadow-xs transition-colors duration-200">
                 <CategoryFilter categories={categories} />
-                <hr />
+                <div className="border-t border-gray-200 dark:border-slate-800" />
                 <BrandFilter brands={brands} />
-                <hr />
+                <div className="border-t border-gray-200 dark:border-slate-800" />
                 <PriceFilter />
-                <hr />
+                <div className="border-t border-gray-200 dark:border-slate-800" />
                 <ColorFilter colors={colors} />
             </div>
-        </>
+        </aside>
     );
 };
 
