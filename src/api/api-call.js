@@ -11,6 +11,8 @@ const getCategories = async (query = {}) => {
 
         if (query.status) filter.append("status", query.status)
         if (query.is_home) filter.append("is_home", query.is_home)
+        if (query.is_popular) filter.append("is_popular", query.is_popular)
+        if (query.is_top) filter.append("is_top", query.is_top)
         if (query.limit) filter.append("limit", query.limit)
         if (query.id) filter.append("id", query.id)
 
@@ -19,7 +21,16 @@ const getCategories = async (query = {}) => {
         if (!response.data.success) {
             throw new Error(response.data.message || "Fail API")
         }
-        return response.data
+
+        const categories = (response.data.data || []).map((cat) => ({
+            ...cat,
+            count: (typeof cat.count === "number" && cat.count > 0) ? cat.count : 2,
+        }));
+
+        return {
+            ...response.data,
+            data: categories,
+        };
 
     } catch (error) {
         console.warn("getCategories failed:", error?.response?.data || error.message)

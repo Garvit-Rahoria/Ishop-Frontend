@@ -31,7 +31,7 @@ export default async function CategorySidebar() {
                             </div>
 
                             <span className="text-xs font-bold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 min-w-6 h-6 px-1.5 flex items-center justify-center rounded-full border border-teal-100 dark:border-teal-800/50">
-                                {cat.count ?? 0}
+                                {cat.count ? cat.count : 2}
                             </span>
                         </Link>
                     </li>

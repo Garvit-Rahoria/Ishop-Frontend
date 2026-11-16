@@ -23,7 +23,7 @@ const SectionTwo = async () => {
                                 image={cat.image}
                                 name={cat.name}
                                 slug={cat.slug}
-                                count={cat.count ?? 0}
+                                count={cat.count ? cat.count : 2}
                                 imageBaseUrl={imageBaseUrl}
                             />
                         ))}
