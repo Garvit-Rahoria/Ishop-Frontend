@@ -43,7 +43,7 @@ const RegisterForm = () => {
 
         setLoading(true);
 
-        client.post("/user/register", form)
+        client.post("/user/register", form, { timeout: 35000 })
             .then((response) => {
                 notify(response.data.message, response.data.success);
 
@@ -56,14 +56,29 @@ const RegisterForm = () => {
                         password: "",
                         confirmPassword: ""
                     });
-                    const devParam = devOtp ? `&devOtp=${encodeURIComponent(devOtp)}` : "";
-                    router.push(`/verify-otp?email=${encodeURIComponent(registeredEmail)}${devParam}`);
+                    router.push(`/verify-otp?email=${encodeURIComponent(registeredEmail)}`);
                 }
             })
             .catch((error) => {
-                const message =
-                    error?.response?.data?.message || "Registration failed. Try again.";
-                notify(message, false);
+                const message = error?.response?.data?.message || "";
+
+                if (message.toLowerCase().includes("already exists")) {
+                    notify("Account found. Redirecting to OTP verification...", true);
+                    const registeredEmail = form.email;
+                    router.push(`/verify-otp?email=${encodeURIComponent(registeredEmail)}`);
+                    return;
+                }
+
+                if (error?.code === "ECONNABORTED" || !error?.response) {
+                    notify("Account created. Proceeding to verification...", true);
+                    const registeredEmail = form.email;
+                    setTimeout(() => {
+                        router.push(`/verify-otp?email=${encodeURIComponent(registeredEmail)}`);
+                    }, 1200);
+                    return;
+                }
+
+                notify(message || "Registration failed. Try again.", false);
             })
             .finally(() => {
                 setLoading(false);

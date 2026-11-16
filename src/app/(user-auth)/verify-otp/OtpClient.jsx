@@ -14,7 +14,6 @@ export default function OtpPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
-    const [devOtpHint, setDevOtpHint] = useState(searchParams.get("devOtp") || null);
     const [otp, setOtp] = useState(new Array(6).fill(""));
     const inputs = useRef([]);
 
@@ -36,6 +35,21 @@ export default function OtpPage() {
         }
     };
 
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData("text").trim();
+        if (/^\d+$/.test(text)) {
+            const digits = text.split("").slice(0, 6);
+            const newOtp = [...otp];
+            digits.forEach((d, i) => {
+                newOtp[i] = d;
+            });
+            setOtp(newOtp);
+            const focusIdx = Math.min(digits.length, 5);
+            inputs.current[focusIdx]?.focus();
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const finalOtp = otp.join("");
@@ -44,7 +58,7 @@ export default function OtpPage() {
             return;
         }
         if (!email) {
-            notify("Email missing — register again", false);
+            notify("Email missing — please register again", false);
             return;
         }
 
@@ -67,7 +81,7 @@ export default function OtpPage() {
             }
         } catch (error) {
             const message =
-                error?.response?.data?.message || "OTP verification failed";
+                error?.response?.data?.message || "OTP verification failed. Please check the code.";
             notify(message, false);
         } finally {
             setLoading(false);
@@ -76,16 +90,13 @@ export default function OtpPage() {
 
     const handleResend = async () => {
         if (!email) {
-            notify("Email missing — register again", false);
+            notify("Email missing — please register again", false);
             return;
         }
         setResending(true);
         try {
             const response = await client.post("/user/reset-otp", { email });
-            notify(response.data.message, response.data.success);
-            if (response.data?.data?.devOtp) {
-                setDevOtpHint(response.data.data.devOtp);
-            }
+            notify(response.data.message || "New OTP sent to your email", response.data.success);
             setOtp(new Array(6).fill(""));
             inputs.current[0]?.focus();
         } catch (error) {
@@ -96,70 +107,43 @@ export default function OtpPage() {
     };
 
     return (
-        <section className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-slate-100 flex flex-col justify-center py-10 sm:py-16 px-4 relative overflow-hidden">
+        <section className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-10 sm:py-16 px-4 relative overflow-hidden transition-colors">
             {/* Ambient Background Lights */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-200/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-100/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="max-w-md w-full mx-auto relative z-10">
                 <div className="mb-4">
                     <Link
                         href="/login"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-teal-600 transition"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition"
                     >
                         <FiArrowLeft size={14} />
                         <span>Back to Sign In</span>
                     </Link>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-7 sm:p-10 w-full text-center">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-gray-200/80 dark:border-slate-800 p-7 sm:p-10 w-full text-center transition-colors">
                     {/* Brand */}
                     <div className="inline-flex items-center gap-2 mb-4">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-black text-xl shadow-md">
                             S
                         </div>
-                        <span className="font-extrabold text-lg tracking-tight text-gray-900">
-                            SWOO <span className="text-teal-600 font-semibold text-sm">TECH MART</span>
+                        <span className="font-extrabold text-lg tracking-tight text-gray-900 dark:text-slate-100">
+                            SWOO <span className="text-teal-600 dark:text-teal-400 font-semibold text-sm">TECH MART</span>
                         </span>
                     </div>
 
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">
+                    <h1 className="text-2xl font-black text-gray-900 dark:text-slate-100 tracking-tight">
                         Verify Your Email
                     </h1>
-                    <p className="text-gray-500 text-xs sm:text-sm mt-1 mb-6">
+                    <p className="text-gray-500 dark:text-slate-400 text-xs sm:text-sm mt-1 mb-8">
                         Enter the 6-digit verification code sent to{" "}
-                        <span className="font-semibold text-gray-800 break-all">{email || "your email"}</span>
+                        <span className="font-bold text-gray-900 dark:text-slate-200 break-all">{email || "your email"}</span>
                     </p>
 
-                    {devOtpHint ? (
-                        <div className="mb-5 p-3.5 bg-amber-50 border border-amber-200/90 rounded-2xl text-left text-xs text-amber-900 shadow-2xs">
-                            <div className="flex items-center justify-between gap-2">
-                                <div className="space-y-0.5">
-                                    <p className="font-extrabold text-[12px] flex items-center gap-1.5 text-amber-900">
-                                        <span>⚡</span>
-                                        <span>Dev Mode OTP Code:</span>
-                                    </p>
-                                    <p className="text-[11px] text-amber-700">
-                                        Use OTP: <span className="font-mono font-black text-amber-950 text-base tracking-widest bg-amber-100/80 px-2 py-0.5 rounded-lg border border-amber-300">{devOtpHint}</span>
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        const digits = String(devOtpHint).split("").slice(0, 6);
-                                        setOtp(digits);
-                                        inputs.current[5]?.focus();
-                                    }}
-                                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-2xs shrink-0 cursor-pointer"
-                                >
-                                    Auto Fill
-                                </button>
-                            </div>
-                        </div>
-                    ) : null}
-
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="flex justify-center gap-2 sm:gap-3">
+                        <div className="flex justify-center gap-2 sm:gap-3" onPaste={handlePaste}>
                             {otp.map((digit, index) => (
                                 <input
                                     key={index}
@@ -170,7 +154,7 @@ export default function OtpPage() {
                                     onChange={(e) => handleChange(e.target.value, index)}
                                     onKeyDown={(e) => handleKeyDown(e, index)}
                                     ref={(el) => (inputs.current[index] = el)}
-                                    className="w-11 h-12 text-center text-xl font-bold bg-gray-50 hover:bg-gray-100/80 focus:bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-100 focus:border-teal-500 outline-none transition"
+                                    className="w-11 h-14 sm:w-13 sm:h-14 text-center text-2xl font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:border-teal-500 dark:focus:border-teal-400 focus:ring-4 focus:ring-teal-500/20 outline-none transition-all shadow-xs caret-teal-600"
                                     aria-label={`OTP digit ${index + 1}`}
                                 />
                             ))}
@@ -192,19 +176,19 @@ export default function OtpPage() {
                         </button>
                     </form>
 
-                    <div className="mt-5 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                    <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400">
                         Didn&apos;t receive code?{" "}
                         <button
                             type="button"
                             onClick={handleResend}
                             disabled={resending}
-                            className="text-teal-600 font-bold hover:underline disabled:opacity-50 cursor-pointer"
+                            className="text-teal-600 dark:text-teal-400 font-bold hover:underline disabled:opacity-50 cursor-pointer"
                         >
                             {resending ? "Resending..." : "Resend OTP"}
                         </button>
                     </div>
 
-                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 mt-4">
+                    <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-400 dark:text-slate-500 mt-4">
                         <FiShield size={13} className="text-teal-500" />
                         <span>Encrypted Account Security</span>
                     </div>

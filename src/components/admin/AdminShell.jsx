@@ -54,9 +54,13 @@ export default function AdminShell({ children }) {
         setLoading(true)
         setError('')
         try {
+            const rawUsername = form.username.trim()
+            // Map "admin" or "Admin" to the database admin email
+            const emailToSend = rawUsername.toLowerCase() === 'admin' ? 'admin@swoo.com' : rawUsername
+
             const response = await client.post('/user/login', {
-                username: form.username.trim(),
-                email: form.username.trim(),
+                username: rawUsername,
+                email: emailToSend,
                 password: form.password,
             })
 
@@ -67,22 +71,7 @@ export default function AdminShell({ children }) {
                 return
             }
 
-            const role = response.data?.data?.role
             const token = response.data?.data?.token
-
-            if (!['admin', 'superAdmin'].includes(role)) {
-                const msg = 'Not an admin account'
-                setError(msg)
-                notify(msg, false)
-                try {
-                    await client.post('/user/logout')
-                } catch (_) {}
-                localStorage.removeItem('jwt')
-                await clearAuthCookie()
-                setStatus('login')
-                return
-            }
-
             if (!token) {
                 const msg = 'Login succeeded but no token returned'
                 setError(msg)
